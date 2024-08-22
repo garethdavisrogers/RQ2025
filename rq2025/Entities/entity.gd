@@ -12,12 +12,16 @@ var type = null
 var movedir = Vector2()
 var spritedir = -1  # -1 for left, 1 for right
 
+#Preload assets
 @onready var enums = preload("../enums.gd")
+
+#Node references
+@onready var entity = $Entity
 @onready var sprite = $Sprite2D
+@onready var hitbox = $Hitbox
 
 enum STATE {
 	IDLE
-	# Add more states as needed
 }
 
 # Movement loop determines node motion
