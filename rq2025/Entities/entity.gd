@@ -22,6 +22,7 @@ var spritedir = -1  # -1 for left, 1 for right
 
 enum STATE {
 	IDLE
+	# Add more states as needed
 }
 
 # Movement loop determines node motion
