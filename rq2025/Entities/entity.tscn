@@ -11,3 +11,5 @@ script = ExtResource("1_k5r66")
 
 [node name="Hitbox" type="CollisionShape2D" parent="."]
 shape = SubResource("CapsuleShape2D_6h4b0")
+
+[node name="Anim" type="AnimationPlayer" parent="."]
