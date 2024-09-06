@@ -2,6 +2,7 @@ extends "res://Entities/entity.gd"
 
 var targeted_player_id = null
 var role = null
+var is_in_melee_range = false
 var roles
 
 func _ready():
@@ -10,10 +11,17 @@ func _ready():
 	roles = level_manager.enemy_roles
 
 func _physics_process(_delta):
-	movement_loop()
-	spritedir_loop()
-	if targeted_player_id == null:
-		target_player()
+	if state == states.DEAD:
+		queue_free()
+	else:
+		if targeted_player_id == null:
+			state_machine(states.IDLE)
+			target_player()
+		elif not is_in_melee_range:
+			state_machine(states.SEEK)
+		if state == states.SEEK:
+			movement_loop()
+			spritedir_loop()
 
 func target_player():
 	var player_tracker = level_manager.player_tracker
@@ -42,4 +50,6 @@ func set_role(pt):
 		role = roles.AGGRESSOR
 	elif existing_roles.size() == 1:
 		role = roles.FLANKER
+	elif existing_roles.size() == 2:
+		role = roles.MINION
 	level_manager.update_assigned_enemies(targeted_player_id, self.get_instance_id(), role)

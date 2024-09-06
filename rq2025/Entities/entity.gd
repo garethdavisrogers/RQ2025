@@ -13,7 +13,8 @@ var max_speed = 200
 # References to LevelManager and state
 var level_manager
 var targeted_player = null
-var current_state = states.IDLE
+var state
+var is_dead = true
 
 # Entity onready vars
 @onready var id = self.get_instance_id()
@@ -23,13 +24,21 @@ var current_state = states.IDLE
 
 enum states {
 	IDLE,
-	MOVING,
-	ATTACKING
+	SEEK,
+	ATTACK,
+	STAGGER,
+	DEAD
 }
+
+func state_machine(s):
+	if state != s:
+		state = s
 
 func _ready():
 	# Access LevelManager using an autoload reference or correct node path
 	level_manager = get_node_or_null("/root/Level")  # Adjust this path if LevelManager is not autoload
+	is_dead = false
+	state_machine(states.IDLE)
 
 # Movement logic
 func movement_loop():
