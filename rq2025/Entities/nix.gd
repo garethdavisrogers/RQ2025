@@ -1,6 +1,9 @@
 extends "res://Entities/entity.gd"
 
-func _physics_process(delta):
+func _ready():
+	add_to_group("PLAYER")
+	
+func _physics_process(_delta):
 	# Add the gravity.
 	movement_loop()
 	spritedir_loop()
