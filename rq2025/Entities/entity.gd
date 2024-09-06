@@ -16,6 +16,7 @@ var targeted_player = null
 var current_state = states.IDLE
 
 # Entity onready vars
+@onready var id = self.get_instance_id()
 @onready var sprite = $Sprite2D
 @onready var hit_box = $Hitbox
 @onready var anim = $Anim
