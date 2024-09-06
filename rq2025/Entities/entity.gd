@@ -28,12 +28,13 @@ enum states {
 
 func _ready():
 	# Access LevelManager using an autoload reference or correct node path
-	level_manager = get_node("/root/Level")  # Adjust this path if LevelManager is not autoload
+	level_manager = get_node_or_null("/root/Level")  # Adjust this path if LevelManager is not autoload
 	
 	# Ensure level_manager is valid
 	if level_manager == null:
 		print("LevelManager not found!")
-		return
+	else:
+		print("LevelManager found!")
 	
 	# Register this entity with the LevelManager
 

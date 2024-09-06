@@ -2,7 +2,8 @@ extends "res://Entities/entity.gd"
 
 func _ready():
 	add_to_group("PLAYER")
-	
+	super()
+
 func _physics_process(_delta):
 	# Add the gravity.
 	movement_loop()
