@@ -15,6 +15,9 @@ var level_manager
 var targeted_player = null
 var state
 var is_dead = true
+var roles
+var role
+var is_on_line = false
 
 # Entity onready vars
 @onready var id = self.get_instance_id()
@@ -25,6 +28,7 @@ var is_dead = true
 enum states {
 	IDLE,
 	SEEK,
+	ENGAGE,
 	ATTACK,
 	STAGGER,
 	DEAD
@@ -38,6 +42,7 @@ func _ready():
 	# Access LevelManager using an autoload reference or correct node path
 	level_manager = get_node_or_null("/root/Level")  # Adjust this path if LevelManager is not autoload
 	is_dead = false
+	roles = level_manager.roles
 	state_machine(states.IDLE)
 
 # Movement logic

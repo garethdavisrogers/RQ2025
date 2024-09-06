@@ -1,14 +1,10 @@
 extends "res://Entities/entity.gd"
 
 var targeted_player_id = null
-var role = null
-var is_in_melee_range = false
-var roles
 
 func _ready():
 	add_to_group("ENEMY")
 	super()
-	roles = level_manager.enemy_roles
 
 func _physics_process(_delta):
 	if state == states.DEAD:
@@ -17,11 +13,14 @@ func _physics_process(_delta):
 		if targeted_player_id == null:
 			state_machine(states.IDLE)
 			target_player()
-		elif not is_in_melee_range:
-			state_machine(states.SEEK)
-		if state == states.SEEK:
+		else:
+			set_range()
 			movement_loop()
 			spritedir_loop()
+			if state == states.SEEK:
+				seek()
+			elif state == states.ENGAGE:
+				movedir = Vector2()
 
 func target_player():
 	var player_tracker = level_manager.player_tracker
@@ -53,3 +52,15 @@ func set_role(pt):
 	elif existing_roles.size() == 2:
 		role = roles.MINION
 	level_manager.update_assigned_enemies(targeted_player_id, self.get_instance_id(), role)
+
+func seek():
+	var player_node = level_manager.player_tracker[targeted_player_id].node
+	movedir = global_position.direction_to(player_node.global_position)
+
+func set_range():
+	var player_node = level_manager.player_tracker[targeted_player_id].node
+	var distance_from_player = global_position.distance_to(player_node.global_position)
+	if distance_from_player > 300:
+		state_machine(states.SEEK)
+	elif distance_from_player > 100:
+		state_machine(states.ENGAGE)

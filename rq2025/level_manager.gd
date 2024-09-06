@@ -2,7 +2,7 @@ extends Node2D
 
 var player_tracker = {}
 
-enum enemy_roles {
+enum roles {
 	AGGRESSOR,
 	FLANKER,
 	MINION
