@@ -23,7 +23,11 @@ func add_player(player_node):
 	var player_key = player_node.get_instance_id()
 	var player_values = {
 		"node": player_node,
-		"assignedEnemies": {}
+		"assignedEnemies": {
+			roles.AGGRESSOR: null,
+			roles.FLANKER: null,
+			roles.MINION: null
+			}
 		}
 	player_tracker[player_key] = player_values
 	
@@ -35,15 +39,21 @@ func get_least_agro_players():
 	var least_agro_players = []
 	var least_agro_count = INF
 	for key in player_tracker.keys():
-		var player_agro_count = player_tracker[key].assignedEnemies.size()
+		var assigned_enemies = player_tracker[key].assignedEnemies
+		var player_agro_count = 0
+		
+		# Count only non-null assigned enemies
+		for role in assigned_enemies.keys():
+			if assigned_enemies[role] != null:
+				player_agro_count += 1
+		
 		if player_agro_count < least_agro_count:
 			least_agro_count = player_agro_count
-			least_agro_players = []
-			least_agro_players.append(key)
+			least_agro_players = [key]
 		elif least_agro_count == player_agro_count:
 			least_agro_players.append(key)
 	return least_agro_players
 
 func update_assigned_enemies(pid, e, enemy_role):
 	var assigned_enemies = player_tracker[pid].assignedEnemies
-	assigned_enemies[e.get_instance_id()] = {"node": e, "role": enemy_role}
+	assigned_enemies[enemy_role] = e

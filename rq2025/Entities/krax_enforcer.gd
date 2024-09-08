@@ -47,11 +47,11 @@ func get_closest_player(player_ids, pt):
 
 func set_role(pt):
 	var existing_roles = pt[targeted_player_id].assignedEnemies
-	if existing_roles.size() == 0:
+	if existing_roles[roles.AGGRESSOR] == null:
 		role = roles.AGGRESSOR
-	elif existing_roles.size() == 1:
+	elif existing_roles[roles.FLANKER] == null:
 		role = roles.FLANKER
-	elif existing_roles.size() == 2:
+	elif existing_roles[roles.MINION] == null:
 		role = roles.MINION
 	level_manager.update_assigned_enemies(targeted_player_id, self, role)
 
@@ -91,15 +91,10 @@ func get_on_line():
 
 func flank():
 	var assigned_enemies = get_targeted_player_assigned_enemies()
-	var aggressor_position = null
+	var targeted_player = level_manager.player_tracker[targeted_player_id]
+	var aggressor_position = targeted_player.assignedEnemies[roles.AGGRESSOR].global_position
 	var flank_radius = 300
 
-	for e in assigned_enemies.keys():
-		if assigned_enemies[e].role == roles.AGGRESSOR:
-			aggressor_position = assigned_enemies[e].node.global_position
-			break
-
-	# Get the player position and direction to the player
 	var player_position = get_targeted_player_position()
 	var direction_to_player = global_position.direction_to(player_position)
 	var distance_to_player = global_position.distance_to(player_position)
