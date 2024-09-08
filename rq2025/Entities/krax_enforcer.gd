@@ -1,7 +1,7 @@
 extends "res://Entities/entity.gd"
 
-const engagement_radius = 400
-const attack_radius = 100
+const ENGAGEMENT_THRESHOLD = 250
+const ATTACK_THRESHOLD = 150
 var targeted_player_id
 
 func _ready():
@@ -16,16 +16,16 @@ func _physics_process(_delta):
 		var distance_from_player = get_distance_to_player()
 		movement_loop()
 		spritedir_loop()
-		if distance_from_player > engagement_radius:
+		if distance_from_player > ENGAGEMENT_THRESHOLD:
 			state_machine(states.SEEK)
-		elif distance_from_player > attack_radius:
+		elif distance_from_player > ATTACK_THRESHOLD:
 			state_machine(states.ENGAGE)
 		else:
 			state_machine(states.ATTACK)
 		if state == states.SEEK:
 			seek()
 		elif state == states.ENGAGE:
-			engage()
+			get_on_line(get_targeted_player_position())
 		elif state == states.ATTACK:
 			movedir = Vector2()
 
@@ -60,11 +60,11 @@ func set_role(pid):
 	level_manager.update_assigned_enemies(targeted_player_id, self, role)
 
 func seek():
-	var player_position = get_targeted_player_position()
-	movedir = global_position.direction_to(player_position)
+	movedir = global_position.direction_to(get_targeted_player_position())
 
 func engage():
-	movedir = Vector2()
+	if role == roles.AGGRESSOR:
+		get_on_line(get_targeted_player_position())
 	
 func get_distance_to_player():
 	var distance_from_player = global_position.distance_to(get_targeted_player_position())
@@ -76,13 +76,12 @@ func get_targeted_player_position():
 func get_targeted_player_assigned_enemies():
 	return level_manager.get_player_assigned_enemies(targeted_player_id)
 	
-func get_on_line():
-	var player_position = get_targeted_player_position()
-	if abs(player_position.y) - abs(global_position.y) > 100:
-		if player_position.y < global_position.y:
-			movedir.x = -1
-		elif player_position.y > global_position.y:
-			movedir.x = 1
+func get_on_line(tpp):
+	if global_position.y < tpp.y:
+		movedir.y = 1
+	elif global_position.y > tpp.y:
+		movedir.y = -1
+
 
 func flank():
 	var assigned_enemies = get_targeted_player_assigned_enemies()
