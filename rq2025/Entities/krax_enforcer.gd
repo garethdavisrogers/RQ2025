@@ -1,7 +1,7 @@
 extends "res://Entities/entity.gd"
 
 const ENGAGEMENT_THRESHOLD = 250
-const ATTACK_THRESHOLD = 150
+const ATTACK_THRESHOLD = 120
 var targeted_player_id
 
 func _ready():
@@ -18,18 +18,15 @@ func _physics_process(_delta):
 		spritedir_loop()
 		if distance_from_player > ENGAGEMENT_THRESHOLD:
 			state_machine(states.SEEK)
+			seek()
 		elif distance_from_player > ATTACK_THRESHOLD:
 			state_machine(states.ENGAGE)
-		elif distance_from_player <= ATTACK_THRESHOLD:
-			state_machine(states.ATTACK)
-		if state == states.SEEK:
-			seek()
-		elif state == states.ENGAGE:
 			if get_is_on_line():
 				state_machine(states.ATTACK)
 			else:
 				engage()
-		elif state == states.ATTACK:
+		elif distance_from_player <= ATTACK_THRESHOLD:
+			state_machine(states.ATTACK)
 			movedir = Vector2()
 
 func target_player():
@@ -53,7 +50,7 @@ func get_closest_player(player_ids, pt):
 		set_role(targeted_player_id)
 		
 func get_is_on_line():
-	return abs(global_position.y - get_targeted_player_position().y) < 30
+	return abs(global_position.y - get_targeted_player_position().y) < 20
 
 func set_role(pid):
 	var existing_roles = level_manager.get_player_assigned_enemies(pid)
@@ -72,6 +69,8 @@ func engage():
 	if role == roles.AGGRESSOR:
 		get_on_line(get_targeted_player_position())
 		adjust_distance()
+	if role == roles.FLANKER:
+		movedir = Vector2()
 	
 func get_distance_to_player():
 	var distance_from_player = global_position.distance_to(get_targeted_player_position())
@@ -95,27 +94,4 @@ func adjust_distance():
 	movedir.x = direction_away_from_player.x
 
 func flank():
-	var assigned_enemies = get_targeted_player_assigned_enemies()
-	var targeted_player = level_manager.player_tracker[targeted_player_id]
-	var aggressor_position = targeted_player.assignedEnemies[roles.AGGRESSOR].global_position
-	var flank_radius = 300
-
-	var player_position = get_targeted_player_position()
-	var direction_to_player = global_position.direction_to(player_position)
-	var distance_to_player = global_position.distance_to(player_position)
-
-	# Calculate the difference in position to maintain the radius
-	var target_position = player_position + (direction_to_player * flank_radius)
-
-	# Adjust the flanker movement if it's too close to the player
-	if distance_to_player < flank_radius:
-		movedir = (global_position - player_position).normalized() * flank_radius
-	else:
-		# Check which side of the player the aggressor is on, and move to the opposite side
-		if (global_position.x < player_position.x and aggressor_position.x < player_position.x) or (global_position.x > player_position.x and aggressor_position.x > player_position.x):
-			if player_position.y < global_position.y:
-				movedir = Vector2(-direction_to_player.y, direction_to_player.x).normalized()
-			else:
-				movedir = Vector2(direction_to_player.y, -direction_to_player.x).normalized()
-		else:
-			movedir = direction_to_player
+	pass
