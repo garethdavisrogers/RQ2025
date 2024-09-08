@@ -1,33 +1,29 @@
 extends "res://Entities/entity.gd"
 
-var targeted_player_id = null
+var targeted_player_id
 
 func _ready():
 	add_to_group("ENEMY")
 	super()
 
 func _physics_process(_delta):
-	if state == states.DEAD:
-		queue_free()
+	if targeted_player_id == null:
+		state_machine(states.IDLE)
+		target_player()
 	else:
-		if targeted_player_id == null:
-			state_machine(states.IDLE)
-			target_player()
-		else:
-			get_distance_to_player()
-			movement_loop()
-			spritedir_loop()
-			if state == states.SEEK:
-				seek()
-			elif state == states.ENGAGE:
-				engage()
-			elif state == states.ATTACK:
-				movedir = Vector2()
+		get_distance_to_player()
+		movement_loop()
+		spritedir_loop()
+		if state == states.SEEK:
+			seek()
+		elif state == states.ENGAGE:
+			engage()
+		elif state == states.ATTACK:
+			movedir = Vector2()
 
 func target_player():
-	var player_tracker = level_manager.player_tracker
 	var least_agro_players = level_manager.get_least_agro_players()
-	get_closest_player(least_agro_players, player_tracker)
+	get_closest_player(least_agro_players, level_manager.player_tracker)
 	
 func get_closest_player(player_ids, pt):
 	var closest_player = null
@@ -42,11 +38,11 @@ func get_closest_player(player_ids, pt):
 				
 	# Update targeted_player_id with the closest player
 	if closest_player != null:
-		targeted_player_id = closest_player.get_instance_id()
-		set_role(pt)
+		targeted_player_id = closest_player.id
+		set_role(targeted_player_id)
 
-func set_role(pt):
-	var existing_roles = pt[targeted_player_id].assignedEnemies
+func set_role(pid):
+	var existing_roles = level_manager.get_player_assigned_enemies(pid)
 	if existing_roles[roles.AGGRESSOR] == null:
 		role = roles.AGGRESSOR
 	elif existing_roles[roles.FLANKER] == null:
@@ -68,7 +64,7 @@ func engage():
 func get_distance_to_player():
 	var player_position = get_targeted_player_position()
 	var distance_from_player = global_position.distance_to(player_position)
-	if distance_from_player > 500:
+	if distance_from_player > 300:
 		state_machine(states.SEEK)
 	elif distance_from_player > 200:
 		state_machine(states.ENGAGE)

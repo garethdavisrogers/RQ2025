@@ -10,6 +10,12 @@ func _ready():
 func get_players():
 	return get_tree().get_nodes_in_group("PLAYER")
 	
+func get_player_instance(pid):
+	return player_tracker[pid].instance
+	
+func get_player_assigned_enemies(pid):
+	return player_tracker[pid].assignedEnemies
+	
 func set_players():
 	var players = get_players()
 	player_tracker = {}
@@ -38,7 +44,7 @@ func get_least_agro_players():
 	var least_agro_players = []
 	var least_agro_count = INF
 	for key in player_tracker.keys():
-		var assigned_enemies = player_tracker[key].assignedEnemies
+		var assigned_enemies = get_player_assigned_enemies(key)
 		var player_agro_count = 0
 		
 		for role in assigned_enemies.keys():
