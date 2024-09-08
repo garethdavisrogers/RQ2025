@@ -67,10 +67,9 @@ func seek():
 
 func engage():
 	if role == roles.AGGRESSOR:
-		get_on_line(get_targeted_player_position())
-		adjust_distance()
+		aggress()
 	if role == roles.FLANKER:
-		movedir = Vector2()
+		flank()
 	
 func get_distance_to_player():
 	var distance_from_player = global_position.distance_to(get_targeted_player_position())
@@ -93,5 +92,20 @@ func adjust_distance():
 	var direction_away_from_player = player_position.direction_to(global_position)
 	movedir.x = direction_away_from_player.x
 
+func aggress():
+	get_on_line(get_targeted_player_position())
+	adjust_distance()
+	
 func flank():
-	pass
+	if aggressor_is_same_side():
+		movedir = Vector2()
+	else:
+		aggress()
+
+func aggressor_is_same_side():
+	var aggressor_x_position = get_targeted_player_assigned_enemies()[roles.AGGRESSOR].position.x
+	var targeted_player_x_position = get_targeted_player_position().x
+	if abs(global_position.x + aggressor_x_position) < abs(global_position.x + targeted_player_x_position):
+		return true
+	return false
+	
