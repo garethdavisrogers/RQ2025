@@ -56,17 +56,14 @@ func seek():
 	movedir = global_position.direction_to(player_position)
 
 func engage():
-	if role == roles.FLANKER:
-		flank()
-	else:
-		get_on_line()
+	movedir = Vector2()
 	
 func get_distance_to_player():
 	var player_position = get_targeted_player_position()
 	var distance_from_player = global_position.distance_to(player_position)
 	if distance_from_player > 300:
 		state_machine(states.SEEK)
-	elif distance_from_player > 200:
+	elif distance_from_player > 250:
 		state_machine(states.ENGAGE)
 	else:
 		state_machine(states.ATTACK)
