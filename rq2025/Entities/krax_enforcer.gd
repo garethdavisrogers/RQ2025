@@ -21,6 +21,8 @@ func _physics_process(_delta):
 				seek()
 			elif state == states.ENGAGE:
 				engage()
+			elif state == states.ATTACK:
+				movedir = Vector2()
 
 func target_player():
 	var player_tracker = level_manager.player_tracker
@@ -51,7 +53,7 @@ func set_role(pt):
 		role = roles.FLANKER
 	elif existing_roles.size() == 2:
 		role = roles.MINION
-	level_manager.update_assigned_enemies(targeted_player_id, self.get_instance_id(), role)
+	level_manager.update_assigned_enemies(targeted_player_id, self, role)
 
 func seek():
 	var player_position = get_targeted_player_position()
@@ -66,13 +68,18 @@ func engage():
 func get_distance_to_player():
 	var player_position = get_targeted_player_position()
 	var distance_from_player = global_position.distance_to(player_position)
-	if distance_from_player > 300:
+	if distance_from_player > 500:
 		state_machine(states.SEEK)
-	elif distance_from_player > 100:
+	elif distance_from_player > 200:
 		state_machine(states.ENGAGE)
+	else:
+		state_machine(states.ATTACK)
 
 func get_targeted_player_position():
 	return level_manager.player_tracker[targeted_player_id].node.global_position
+	
+func get_targeted_player_assigned_enemies():
+	return level_manager.player_tracker[targeted_player_id].assignedEnemies
 	
 func get_on_line():
 	var player_position = get_targeted_player_position()
@@ -83,19 +90,32 @@ func get_on_line():
 			movedir = Vector2(1, 0)
 
 func flank():
-	# Get player's position
+	var assigned_enemies = get_targeted_player_assigned_enemies()
+	var aggressor_position = null
+	var flank_radius = 300
+
+	for e in assigned_enemies.keys():
+		if assigned_enemies[e].role == roles.AGGRESSOR:
+			aggressor_position = assigned_enemies[e].node.global_position
+			break
+
+	# Get the player position and direction to the player
 	var player_position = get_targeted_player_position()
-
-	# Calculate the direction from the enemy to the player
 	var direction_to_player = global_position.direction_to(player_position)
+	var distance_to_player = global_position.distance_to(player_position)
 
-	if player_position.y < global_position.y:
-		# If the player is below the enemy, flank above
-		# Move the enemy counterclockwise in the hemisphere above the player
-		movedir = Vector2(-direction_to_player.y, direction_to_player.x).normalized()
+	# Calculate the difference in position to maintain the radius
+	var target_position = player_position + (direction_to_player * flank_radius)
+
+	# Adjust the flanker movement if it's too close to the player
+	if distance_to_player < flank_radius:
+		movedir = (global_position - player_position).normalized() * flank_radius
 	else:
-		# If the player is above the enemy, flank below
-		# Move the enemy clockwise in the hemisphere below the player
-		movedir = Vector2(direction_to_player.y, -direction_to_player.x).normalized()
-
-	# Move the enemy in the chosen direction while maintaining the desired radius
+		# Check which side of the player the aggressor is on, and move to the opposite side
+		if (global_position.x < player_position.x and aggressor_position.x < player_position.x) or (global_position.x > player_position.x and aggressor_position.x > player_position.x):
+			if player_position.y < global_position.y:
+				movedir = Vector2(-direction_to_player.y, direction_to_player.x).normalized()
+			else:
+				movedir = Vector2(direction_to_player.y, -direction_to_player.x).normalized()
+		else:
+			movedir = direction_to_player

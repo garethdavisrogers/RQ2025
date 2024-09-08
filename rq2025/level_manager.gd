@@ -44,6 +44,6 @@ func get_least_agro_players():
 			least_agro_players.append(key)
 	return least_agro_players
 
-func update_assigned_enemies(pid, eid, enemy_role):
+func update_assigned_enemies(pid, e, enemy_role):
 	var assigned_enemies = player_tracker[pid].assignedEnemies
-	assigned_enemies[eid] = {"role": enemy_role}
+	assigned_enemies[e.get_instance_id()] = {"node": e, "role": enemy_role}
