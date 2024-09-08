@@ -12,10 +12,12 @@ var max_speed = 200
 
 # References to LevelManager and state
 var level_manager
+var enums
 var targeted_player = null
 var state
 var is_dead = true
 var roles
+var states
 var role
 var is_on_line = false
 
@@ -25,24 +27,17 @@ var is_on_line = false
 @onready var hit_box = $Hitbox
 @onready var anim = $Anim
 
-enum states {
-	IDLE,
-	SEEK,
-	ENGAGE,
-	ATTACK,
-	STAGGER,
-	DEAD
-}
-
 func state_machine(s):
 	if state != s:
 		state = s
 
 func _ready():
 	# Access LevelManager using an autoload reference or correct node path
-	level_manager = get_node_or_null("/root/Level")  # Adjust this path if LevelManager is not autoload
+	level_manager = get_node_or_null("/root/Level")
+	enums = level_manager.enums
 	is_dead = false
-	roles = level_manager.roles
+	states = enums.states
+	roles = enums.roles
 	state_machine(states.IDLE)
 
 # Movement logic

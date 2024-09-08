@@ -1,5 +1,6 @@
 extends Node2D
 
+var enums = load("res://enums.gd")
 var player_tracker = {}
 
 enum roles {
