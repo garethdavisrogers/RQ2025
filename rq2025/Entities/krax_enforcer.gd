@@ -20,12 +20,15 @@ func _physics_process(_delta):
 			state_machine(states.SEEK)
 		elif distance_from_player > ATTACK_THRESHOLD:
 			state_machine(states.ENGAGE)
-		else:
+		elif distance_from_player <= ATTACK_THRESHOLD:
 			state_machine(states.ATTACK)
 		if state == states.SEEK:
 			seek()
 		elif state == states.ENGAGE:
-			get_on_line(get_targeted_player_position())
+			if get_is_on_line():
+				state_machine(states.ATTACK)
+			else:
+				engage()
 		elif state == states.ATTACK:
 			movedir = Vector2()
 
@@ -48,6 +51,9 @@ func get_closest_player(player_ids, pt):
 	if closest_player != null:
 		targeted_player_id = closest_player.id
 		set_role(targeted_player_id)
+		
+func get_is_on_line():
+	return abs(global_position.y - get_targeted_player_position().y) < 30
 
 func set_role(pid):
 	var existing_roles = level_manager.get_player_assigned_enemies(pid)
@@ -65,6 +71,7 @@ func seek():
 func engage():
 	if role == roles.AGGRESSOR:
 		get_on_line(get_targeted_player_position())
+		adjust_distance()
 	
 func get_distance_to_player():
 	var distance_from_player = global_position.distance_to(get_targeted_player_position())
@@ -82,6 +89,10 @@ func get_on_line(tpp):
 	elif global_position.y > tpp.y:
 		movedir.y = -1
 
+func adjust_distance():
+	var player_position = get_targeted_player_position()
+	var direction_away_from_player = player_position.direction_to(global_position)
+	movedir.x = direction_away_from_player.x
 
 func flank():
 	var assigned_enemies = get_targeted_player_assigned_enemies()
