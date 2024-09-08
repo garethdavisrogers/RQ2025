@@ -16,6 +16,9 @@ func get_player_instance(pid):
 func get_player_assigned_enemies(pid):
 	return player_tracker[pid].assignedEnemies
 	
+func get_player_position(pid):
+	return player_tracker[pid].instance.global_position
+	
 func set_players():
 	var players = get_players()
 	player_tracker = {}

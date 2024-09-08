@@ -1,5 +1,7 @@
 extends "res://Entities/entity.gd"
 
+const engagement_radius = 400
+const attack_radius = 100
 var targeted_player_id
 
 func _ready():
@@ -11,9 +13,15 @@ func _physics_process(_delta):
 		state_machine(states.IDLE)
 		target_player()
 	else:
-		get_distance_to_player()
+		var distance_from_player = get_distance_to_player()
 		movement_loop()
 		spritedir_loop()
+		if distance_from_player > engagement_radius:
+			state_machine(states.SEEK)
+		elif distance_from_player > attack_radius:
+			state_machine(states.ENGAGE)
+		else:
+			state_machine(states.ATTACK)
 		if state == states.SEEK:
 			seek()
 		elif state == states.ENGAGE:
@@ -59,28 +67,22 @@ func engage():
 	movedir = Vector2()
 	
 func get_distance_to_player():
-	var player_position = get_targeted_player_position()
-	var distance_from_player = global_position.distance_to(player_position)
-	if distance_from_player > 300:
-		state_machine(states.SEEK)
-	elif distance_from_player > 250:
-		state_machine(states.ENGAGE)
-	else:
-		state_machine(states.ATTACK)
+	var distance_from_player = global_position.distance_to(get_targeted_player_position())
+	return distance_from_player
 
 func get_targeted_player_position():
-	return level_manager.player_tracker[targeted_player_id].instance.global_position
+	return level_manager.get_player_position(targeted_player_id)
 	
 func get_targeted_player_assigned_enemies():
-	return level_manager.player_tracker[targeted_player_id].assignedEnemies
+	return level_manager.get_player_assigned_enemies(targeted_player_id)
 	
 func get_on_line():
 	var player_position = get_targeted_player_position()
 	if abs(player_position.y) - abs(global_position.y) > 100:
 		if player_position.y < global_position.y:
-			movedir = Vector2(-1, 0)
+			movedir.x = -1
 		elif player_position.y > global_position.y:
-			movedir = Vector2(1, 0)
+			movedir.x = 1
 
 func flank():
 	var assigned_enemies = get_targeted_player_assigned_enemies()
