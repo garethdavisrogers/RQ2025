@@ -33,7 +33,7 @@ func get_closest_player(player_ids, pt):
 	var closest_player = null
 	var closest_distance = INF  # Start with a large number to compare distances
 	for id in player_ids:
-		var player_node = pt[id].node
+		var player_node = pt[id].instance
 		if player_node:  # Ensure the player node exists
 			var distance = global_position.distance_to(player_node.global_position)  # Calculate distance
 			if distance < closest_distance:
@@ -76,7 +76,7 @@ func get_distance_to_player():
 		state_machine(states.ATTACK)
 
 func get_targeted_player_position():
-	return level_manager.player_tracker[targeted_player_id].node.global_position
+	return level_manager.player_tracker[targeted_player_id].instance.global_position
 	
 func get_targeted_player_assigned_enemies():
 	return level_manager.player_tracker[targeted_player_id].assignedEnemies

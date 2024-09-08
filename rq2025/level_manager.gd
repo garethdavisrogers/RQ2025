@@ -1,40 +1,38 @@
 extends Node2D
 
-var enums = load("res://enums.gd")
+var statics = load("res://statics.gd")
+var roles = statics.roles
 var player_tracker = {}
-
-enum roles {
-	AGGRESSOR,
-	FLANKER,
-	MINION
-}
 
 func _ready():
 	set_players()
 
+func get_players():
+	return get_tree().get_nodes_in_group("PLAYER")
+	
 func set_players():
+	var players = get_players()
 	player_tracker = {}
-	var players = get_tree().get_nodes_in_group("PLAYER")
 	for player in players:
-		var player_id = str(player.get_instance_id())
-		if not player_tracker.has(player_id):
+		if not player_tracker.has(player.id):
 			add_player(player)
 
-func add_player(player_node):
-	var player_key = player_node.get_instance_id()
+func add_player(player_instance):
+	var player_key = player_instance.id
 	var player_values = {
-		"node": player_node,
+		"instance": player_instance,
 		"assignedEnemies": {
 			roles.AGGRESSOR: null,
 			roles.FLANKER: null,
-			roles.MINION: null
+			roles.MINION: null,
+			roles.SNIPER: null,
+			roles.JACKAL: null
 			}
 		}
 	player_tracker[player_key] = player_values
 	
 func remove_player(player_node):
-	var player_id = str(player_node.get_instance_id())
-	player_tracker.erase(player_id)
+	player_tracker.erase(player_node.id)
 	
 func get_least_agro_players():
 	var least_agro_players = []
@@ -43,7 +41,6 @@ func get_least_agro_players():
 		var assigned_enemies = player_tracker[key].assignedEnemies
 		var player_agro_count = 0
 		
-		# Count only non-null assigned enemies
 		for role in assigned_enemies.keys():
 			if assigned_enemies[role] != null:
 				player_agro_count += 1
