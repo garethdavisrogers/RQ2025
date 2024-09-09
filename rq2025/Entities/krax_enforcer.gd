@@ -1,6 +1,6 @@
 extends "res://Entities/entity.gd"
 
-const ENGAGEMENT_THRESHOLD = 250
+const ENGAGEMENT_THRESHOLD = 300
 const ATTACK_THRESHOLD = 100
 var targeted_player_id
 
@@ -65,11 +65,10 @@ func seek():
 func engage():
 	if role == roles.AGGRESSOR:
 		aggress()
-	if role == roles.FLANKER:
-		if aggressor_is_same_side():
-			flank()
-		else:
-			aggress()
+	elif role == roles.FLANKER:
+		flank()
+	else:
+		pass
 	
 func get_distance_to_player():
 	var distance_from_player = global_position.distance_to(get_targeted_player_position())
@@ -92,30 +91,27 @@ func adjust_distance():
 	var direction_away_from_player = player_position.direction_to(global_position)
 	movedir.x = direction_away_from_player.x
 
-func aggress():
-	get_on_line(get_targeted_player_position())
-	adjust_distance()
-	
 func flank():
 	var player_position = get_targeted_player_position()
-	
-	# Calculate the direction to the player
 	var direction_to_player = global_position.direction_to(player_position)
-	
-	# Get the orthogonal (perpendicular) vector to the direction (to orbit)
-	var perpendicular_vector = direction_to_player.orthogonal().normalized()
-	
-	
-	if aggressor_is_same_side():
-		# Move perpendicular to the player (orbit around the player)
-		movedir = perpendicular_vector
+	var perpendicular_vector = direction_to_player.orthogonal()
+
+	# Flank on the same side as the aggressor
+	# Move along the perpendicular vector (orbit the player)
+	movedir = perpendicular_vector.normalized()
+
+		# After mirroring, check if the flanker is aligned with the player's y-axis (on_line)
+	if not aggressor_is_same_side() and get_is_on_line():
+		aggress()
+
+func aggress():
+	if not get_is_on_line():
+		get_on_line(get_targeted_player_position())
 	else:
-		# If on the opposite side, reposition smoothly to the other side
-		# You can use an interpolation to smooth the transition
-		var target_position = player_position + Vector2(ENGAGEMENT_THRESHOLD * perpendicular_vector.x, ENGAGEMENT_THRESHOLD * perpendicular_vector.y)
+		state_machine(states.ATTACK)
+		movedir = Vector2()
+
 		
-		# Gradually move toward the target position
-		movedir = (target_position - global_position).normalized()
 
 func aggressor_is_same_side():
 	var aggressor_x_position = get_targeted_player_assigned_enemies()[roles.AGGRESSOR].position.x
@@ -124,6 +120,5 @@ func aggressor_is_same_side():
 		return true
 	if max(aggressor_x_position, targeted_player_x_position, global_position.x) == targeted_player_x_position:
 		return true
-		
 	return false
 	
