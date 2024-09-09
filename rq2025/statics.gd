@@ -18,5 +18,6 @@ enum states {
 	DEFEND,
 	CLINCH,
 	STAGGER,
+	FLANKING,
 	DEAD
 }

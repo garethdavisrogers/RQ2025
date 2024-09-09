@@ -1,7 +1,7 @@
 extends "res://Entities/entity.gd"
 
 const ENGAGEMENT_THRESHOLD = 250
-const ATTACK_THRESHOLD = 120
+const ATTACK_THRESHOLD = 100
 var targeted_player_id
 
 func _ready():
@@ -21,10 +21,7 @@ func _physics_process(_delta):
 			seek()
 		elif distance_from_player > ATTACK_THRESHOLD:
 			state_machine(states.ENGAGE)
-			if get_is_on_line():
-				state_machine(states.ATTACK)
-			else:
-				engage()
+			engage()
 		elif distance_from_player <= ATTACK_THRESHOLD:
 			state_machine(states.ATTACK)
 			movedir = Vector2()
@@ -69,7 +66,10 @@ func engage():
 	if role == roles.AGGRESSOR:
 		aggress()
 	if role == roles.FLANKER:
-		flank()
+		if aggressor_is_same_side():
+			flank()
+		else:
+			aggress()
 	
 func get_distance_to_player():
 	var distance_from_player = global_position.distance_to(get_targeted_player_position())
@@ -97,15 +97,33 @@ func aggress():
 	adjust_distance()
 	
 func flank():
+	var player_position = get_targeted_player_position()
+	
+	# Calculate the direction to the player
+	var direction_to_player = global_position.direction_to(player_position)
+	
+	# Get the orthogonal (perpendicular) vector to the direction (to orbit)
+	var perpendicular_vector = direction_to_player.orthogonal().normalized()
+	
+	
 	if aggressor_is_same_side():
-		movedir = Vector2()
+		# Move perpendicular to the player (orbit around the player)
+		movedir = perpendicular_vector
 	else:
-		aggress()
+		# If on the opposite side, reposition smoothly to the other side
+		# You can use an interpolation to smooth the transition
+		var target_position = player_position + Vector2(ENGAGEMENT_THRESHOLD * perpendicular_vector.x, ENGAGEMENT_THRESHOLD * perpendicular_vector.y)
+		
+		# Gradually move toward the target position
+		movedir = (target_position - global_position).normalized()
 
 func aggressor_is_same_side():
 	var aggressor_x_position = get_targeted_player_assigned_enemies()[roles.AGGRESSOR].position.x
 	var targeted_player_x_position = get_targeted_player_position().x
-	if abs(global_position.x + aggressor_x_position) < abs(global_position.x + targeted_player_x_position):
+	if min(aggressor_x_position, targeted_player_x_position, global_position.x) == targeted_player_x_position:
 		return true
+	if max(aggressor_x_position, targeted_player_x_position, global_position.x) == targeted_player_x_position:
+		return true
+		
 	return false
 	
