@@ -19,7 +19,7 @@ var is_dead = true
 var roles
 var states
 var role
-var is_on_line = false
+var getting_on_line = false
 
 # Entity onready vars
 @onready var id = self.get_instance_id()
