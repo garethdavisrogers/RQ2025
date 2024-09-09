@@ -9,7 +9,7 @@ y_sort_enabled = true
 script = ExtResource("1_0jlth")
 
 [node name="Nix" parent="." instance=ExtResource("2_aickq")]
-position = Vector2(961, 280)
+position = Vector2(556, 363)
 
 [node name="KraxEnforcer" parent="." instance=ExtResource("3_v487r")]
-position = Vector2(303, 272)
+position = Vector2(887, 241)
