@@ -12,4 +12,6 @@ script = ExtResource("1_0jlth")
 position = Vector2(556, 363)
 
 [node name="KraxEnforcer" parent="." instance=ExtResource("3_v487r")]
-position = Vector2(887, 241)
+position = Vector2(376, 363)
+
+[node name="KraxEnforcer2" parent="." instance=ExtResource("3_v487r")]
