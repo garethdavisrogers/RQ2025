@@ -2,7 +2,10 @@ extends "res://Entities/entity.gd"
 
 const ENGAGEMENT_THRESHOLD = 300
 const ATTACK_THRESHOLD = 120
+const MINION_ATTACK_THRESHOLD = 180
+var enemy_helpers = load("res://enemy_helpers.gd")
 var targeted_player_id
+var distance_to_targeted_player
 
 func _ready():
 	add_to_group("ENEMY")
@@ -12,17 +15,17 @@ func _physics_process(_delta):
 	if targeted_player_id == null:
 		state_machine(states.IDLE)
 	else:
-		var distance_to_player = get_distance_to_targeted_player()
-		
+		distance_to_targeted_player = get_distance_to_targeted_player()
 		if not get_is_on_line():
 			is_getting_on_line = true
-		set_is_on_line()
+		
 		movement_loop()
 		spritedir_loop()
+		set_is_on_line()
 		
-		if distance_to_player > ENGAGEMENT_THRESHOLD:
+		if distance_to_targeted_player > ENGAGEMENT_THRESHOLD:
 			state_machine(states.SEEK)
-		elif distance_to_player > ATTACK_THRESHOLD or is_getting_on_line:
+		elif distance_to_targeted_player > ATTACK_THRESHOLD:
 			state_machine(states.ENGAGE)
 		else:
 			state_machine(states.ATTACK)
@@ -74,36 +77,54 @@ func engage():
 		aggress()
 	elif role == roles.FLANKER:
 		flank()
+	elif role == roles.MINION:
+		bolster()
 	else:
 		pass
 		
 func flank():
-	var distance_to_player = get_distance_to_targeted_player()
-	if aggressor_is_same_side() or is_getting_on_line:
+	var aggressor_is_same_side = aggressor_is_same_side()
+	if aggressor_is_same_side or is_getting_on_line:
 		var orthogonal_coefficient = get_orthogonal_coefficient()
 		var player_direction = get_direction_to_targeted_player()
-		var orthogonal_direction = get_direction_to_targeted_player().orthogonal() * orthogonal_coefficient
-		movedir = orthogonal_direction
-		if distance_to_player < ATTACK_THRESHOLD:
-			movedir += player_direction * -1
-	elif distance_to_player > ATTACK_THRESHOLD:
+		var orthogonal_direction = get_direction_to_targeted_player().orthogonal() * orthogonal_coefficient 
+		if aggressor_is_same_side:
+			orthogonal_direction *= -1
+		movedir = orthogonal_direction.normalized()
+		if distance_to_targeted_player < ATTACK_THRESHOLD:
+			var normalized_movedir = (player_direction * 1) + movedir
+			movedir += normalized_movedir.normalized()
+	elif distance_to_targeted_player > ATTACK_THRESHOLD:
 			approach()
 	else:
 		state_machine(states.ATTACK)
 
 func aggress():
-	var distance_to_player = get_distance_to_targeted_player()
 	if is_getting_on_line:
-		var orthogonal_coefficient = get_orthogonal_coefficient()
-		var player_direction = get_direction_to_targeted_player()
-		var orthogonal_direction = get_direction_to_targeted_player().orthogonal() * orthogonal_coefficient
-		movedir = orthogonal_direction
-		if distance_to_player < ATTACK_THRESHOLD:
-			movedir += player_direction * -1
-	elif distance_to_player > ATTACK_THRESHOLD:
+		movedir = get_orthogonal_direction()
+		if distance_to_targeted_player < ATTACK_THRESHOLD:
+			movedir += get_direction_to_targeted_player() * -1
+	elif distance_to_targeted_player > ATTACK_THRESHOLD:
 			approach()
 	else:
 		state_machine(states.ATTACK)
+
+func bolster():
+	if is_getting_on_line:
+		movedir = get_orthogonal_direction()
+		var player_direction = get_direction_to_targeted_player()
+		if distance_to_targeted_player < ATTACK_THRESHOLD:
+			movedir += player_direction * -1
+		if distance_to_targeted_player < MINION_ATTACK_THRESHOLD:
+			movedir += player_direction * -1
+	elif distance_to_targeted_player > MINION_ATTACK_THRESHOLD:
+			approach()
+	else:
+		state_machine(states.ATTACK)
+		
+func get_orthogonal_direction():
+	var orthogonal_coefficient = get_orthogonal_coefficient()
+	return get_direction_to_targeted_player().orthogonal() * orthogonal_coefficient
 	
 func get_distance_to_targeted_player():
 	return global_position.distance_to(get_targeted_player_position())
@@ -134,15 +155,7 @@ func set_is_on_line():
 		is_getting_on_line = false
 	
 func get_orthogonal_coefficient():
-	var direction_to_player = get_direction_to_targeted_player()
-	var below_player = direction_to_player.y <= 0
-	var above_player = direction_to_player.y > 0
-	var left_of_player = direction_to_player.x > 0
-	var right_of_player = direction_to_player.x <= 0
-	if below_player and left_of_player or above_player and right_of_player:
-		return 1
-	elif below_player and right_of_player or above_player and left_of_player:
-		return -1
+	return enemy_helpers.get_orthogonal_coefficient(get_direction_to_targeted_player())
 
 func adjust_distance():
 	var player_position = get_targeted_player_position()
@@ -152,11 +165,7 @@ func adjust_distance():
 func aggressor_is_same_side():
 	var aggressor_x_position = get_targeted_player_assigned_enemies()[roles.AGGRESSOR].position.x
 	var targeted_player_x_position = get_targeted_player_position().x
-	if min(aggressor_x_position, targeted_player_x_position, global_position.x) == targeted_player_x_position:
-		return true
-	if max(aggressor_x_position, targeted_player_x_position, global_position.x) == targeted_player_x_position:
-		return true
-	return false
+	return enemy_helpers.aggressor_is_same_side(aggressor_x_position, targeted_player_x_position, global_position.x)
 	
 func approach():
 	movedir = global_position.direction_to(get_targeted_player_position())
