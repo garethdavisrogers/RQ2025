@@ -12,7 +12,6 @@ var max_speed = 200
 
 # References to LevelManager and state
 var level_manager
-var statics
 var targeted_player = null
 var state
 var is_dead = true
@@ -34,10 +33,9 @@ func state_machine(s):
 func _ready():
 	# Access LevelManager using an autoload reference or correct node path
 	level_manager = get_node_or_null("/root/Level")
-	statics = level_manager.statics
 	is_dead = false
-	states = statics.states
-	roles = statics.roles
+	states = level_manager.enums.states
+	roles = level_manager.enums.roles
 	state_machine(states.IDLE)
 
 # Movement logic

@@ -1,7 +1,7 @@
 extends "res://Entities/entity.gd"
 
 const ENGAGEMENT_THRESHOLD = 300
-const ATTACK_THRESHOLD = 150
+const ATTACK_THRESHOLD = 120
 var targeted_player_id
 
 func _ready():
@@ -11,31 +11,34 @@ func _ready():
 func _physics_process(_delta):
 	if targeted_player_id == null:
 		state_machine(states.IDLE)
-		target_player()
 	else:
-		var distance_from_player = get_distance_to_player()
+		var distance_to_player = get_distance_to_targeted_player()
+		
+		if not get_is_on_line():
+			is_getting_on_line = true
+		set_is_on_line()
 		movement_loop()
 		spritedir_loop()
-		if distance_from_player > ENGAGEMENT_THRESHOLD:
+		
+		if distance_to_player > ENGAGEMENT_THRESHOLD:
 			state_machine(states.SEEK)
-		elif distance_from_player > ATTACK_THRESHOLD:
+		elif distance_to_player > ATTACK_THRESHOLD or is_getting_on_line:
 			state_machine(states.ENGAGE)
 		else:
 			state_machine(states.ATTACK)
-		match state:
-			states.IDLE:
-				target_player()
-			states.SEEK:
-				seek()
-			states.ENGAGE:
-				engage()
-			states.ATTACK:
-				movedir = Vector2()
+	match state:
+		states.IDLE:
+			target_player()
+		states.SEEK:
+			seek()
+		states.ENGAGE:
+			engage()
+		states.ATTACK:
+			movedir = Vector2()
 				
 func target_player():
 	var least_agro_players = level_manager.get_least_agro_players()
 	get_closest_player(least_agro_players)
-	
 	
 func get_closest_player(player_ids):
 	var closest_player = null
@@ -67,8 +70,6 @@ func seek():
 	approach()
 	
 func engage():
-	if not get_is_on_line():
-		is_getting_on_line = true
 	if role == roles.AGGRESSOR:
 		aggress()
 	elif role == roles.FLANKER:
@@ -77,33 +78,37 @@ func engage():
 		pass
 		
 func flank():
-	if aggressor_is_same_side():
-		pass
-	else:
-		movedir = Vector2()
-
-func aggress():
-	set_is_on_line()
-	var distance_to_player = get_distance_to_player()
-	if is_getting_on_line:
+	var distance_to_player = get_distance_to_targeted_player()
+	if aggressor_is_same_side() or is_getting_on_line:
 		var orthogonal_coefficient = get_orthogonal_coefficient()
-		var player_direction = get_direction_to_player()
-		movedir = get_direction_to_player().orthogonal() * orthogonal_coefficient
-		if distance_to_player > ENGAGEMENT_THRESHOLD - 10:
-			movedir.x = (1 + movedir.x)/2
-		if distance_to_player < ATTACK_THRESHOLD -10:
-			movedir.x = (-1 + movedir.x)/2
+		var player_direction = get_direction_to_targeted_player()
+		var orthogonal_direction = get_direction_to_targeted_player().orthogonal() * orthogonal_coefficient
+		movedir = orthogonal_direction
+		if distance_to_player < ATTACK_THRESHOLD:
+			movedir += player_direction * -1
 	elif distance_to_player > ATTACK_THRESHOLD:
-		approach()
+			approach()
 	else:
 		state_machine(states.ATTACK)
-		movedir = Vector2()
+
+func aggress():
+	var distance_to_player = get_distance_to_targeted_player()
+	if is_getting_on_line:
+		var orthogonal_coefficient = get_orthogonal_coefficient()
+		var player_direction = get_direction_to_targeted_player()
+		var orthogonal_direction = get_direction_to_targeted_player().orthogonal() * orthogonal_coefficient
+		movedir = orthogonal_direction
+		if distance_to_player < ATTACK_THRESHOLD:
+			movedir += player_direction * -1
+	elif distance_to_player > ATTACK_THRESHOLD:
+			approach()
+	else:
+		state_machine(states.ATTACK)
 	
-func get_distance_to_player():
-	var distance_from_player = global_position.distance_to(get_targeted_player_position())
-	return distance_from_player
+func get_distance_to_targeted_player():
+	return global_position.distance_to(get_targeted_player_position())
 	
-func get_direction_to_player():
+func get_direction_to_targeted_player():
 	return global_position.direction_to(get_targeted_player_position())
 
 func get_targeted_player_position():
@@ -125,18 +130,18 @@ func get_is_on_line():
 	return abs(global_position.y - get_targeted_player_position().y) < 20
 	
 func set_is_on_line():
-	if abs(global_position.y - get_targeted_player_position().y) < 2:
+	if abs(global_position.y - get_targeted_player_position().y) < 1:
 		is_getting_on_line = false
 	
 func get_orthogonal_coefficient():
-	var direction_to_player = get_direction_to_player()
+	var direction_to_player = get_direction_to_targeted_player()
 	var below_player = direction_to_player.y <= 0
 	var above_player = direction_to_player.y > 0
 	var left_of_player = direction_to_player.x > 0
 	var right_of_player = direction_to_player.x <= 0
 	if below_player and left_of_player or above_player and right_of_player:
 		return 1
-	if below_player and right_of_player or above_player and left_of_player:
+	elif below_player and right_of_player or above_player and left_of_player:
 		return -1
 
 func adjust_distance():
@@ -156,5 +161,4 @@ func aggressor_is_same_side():
 func approach():
 	movedir = global_position.direction_to(get_targeted_player_position())
 
-func orbit():
-	pass
+	

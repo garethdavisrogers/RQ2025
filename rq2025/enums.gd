@@ -1,7 +1,5 @@
 extends Node
 
-#Statics is simply a reference to unchanging data formats like role or state
-
 enum roles {
 	AGGRESSOR,
 	FLANKER,

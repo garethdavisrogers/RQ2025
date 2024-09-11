@@ -1,23 +1,15 @@
 extends Node2D
 
-var statics = load("res://statics.gd")
-var roles = statics.roles
+var enums = load("res://enums.gd")
+var roles = enums.roles
 var player_tracker = {}
 
 func _ready():
 	set_players()
 
+#Player initialization
 func get_players():
 	return get_tree().get_nodes_in_group("PLAYER")
-	
-func get_player_instance(pid):
-	return player_tracker[pid].instance
-	
-func get_player_assigned_enemies(pid):
-	return player_tracker[pid].assignedEnemies
-	
-func get_player_position(pid):
-	return player_tracker[pid].instance.global_position
 	
 func set_players():
 	var players = get_players()
@@ -42,6 +34,18 @@ func add_player(player_instance):
 	
 func remove_player(player_node):
 	player_tracker.erase(player_node.id)
+
+#Get player details from player tracker
+
+func get_player_instance(pid):
+	return player_tracker[pid].instance
+	
+func get_player_assigned_enemies(pid):
+	return player_tracker[pid].assignedEnemies
+	
+func get_player_position(pid):
+	return player_tracker[pid].instance.global_position
+
 	
 func get_least_agro_players():
 	var least_agro_players = []
