@@ -1,7 +1,7 @@
 extends "res://Entities/entity.gd"
 
 const ENGAGEMENT_THRESHOLD = 250
-const ATTACK_THRESHOLD = 120
+const ATTACK_THRESHOLD = 150
 const MINION_ATTACK_THRESHOLD = 180
 const MELEE_THRESHOLD = 100
 var enemy_helpers = load("res://enemy_helpers.gd")
@@ -27,7 +27,7 @@ func _physics_process(_delta):
 		
 		if distance_to_targeted_player > ENGAGEMENT_THRESHOLD:
 			state_machine(states.SEEK)
-		elif distance_to_targeted_player > ATTACK_THRESHOLD:
+		elif distance_to_targeted_player > ATTACK_THRESHOLD or is_getting_on_line:
 			state_machine(states.ENGAGE)
 		else:
 			state_machine(states.ATTACK)
@@ -55,13 +55,7 @@ func get_closest_player(player_ids):
 		set_role(targeted_player_id)
 
 func set_role(pid):
-	var existing_roles = level_manager.get_player_assigned_enemies(pid)
-	if existing_roles[roles.AGGRESSOR] == null:
-		role = roles.AGGRESSOR
-	elif existing_roles[roles.FLANKER] == null:
-		role = roles.FLANKER
-	elif existing_roles[roles.MINION] == null:
-		role = roles.MINION
+	role = enemy_helpers.set_role(level_manager, targeted_player_id, roles)
 	level_manager.update_assigned_enemies(targeted_player_id, self, role)
 
 func seek():
@@ -76,22 +70,6 @@ func engage():
 		bolster()
 	else:
 		pass
-		
-func flank():
-	var aggressor_is_same_side = aggressor_is_same_side()
-	if aggressor_is_same_side or is_getting_on_line:
-		var player_direction = get_direction_to_targeted_player()
-		var orthogonal_direction = get_orthogonal_direction()
-		if aggressor_is_same_side:
-			orthogonal_direction *= -1
-		movedir = orthogonal_direction.normalized()
-		if distance_to_targeted_player < ATTACK_THRESHOLD:
-			var normalized_movedir = (player_direction * 1) + movedir
-			movedir += normalized_movedir.normalized()
-	elif distance_to_targeted_player > ATTACK_THRESHOLD:
-			approach()
-	else:
-		state_machine(states.ATTACK)
 
 func aggress():
 	if is_getting_on_line:
@@ -100,37 +78,42 @@ func aggress():
 			movedir += get_direction_to_targeted_player() * -1
 	elif distance_to_targeted_player > ATTACK_THRESHOLD:
 			approach()
-	else:
-		state_machine(states.ATTACK)
 
+func flank():
+	var player_direction = get_direction_to_targeted_player()
+	var orthogonal_direction = get_orthogonal_direction()
+	if aggressor_is_same_side():
+		is_getting_on_line = true
+		orthogonal_direction *= -1
+	movedir = orthogonal_direction.normalized()
+	if distance_to_targeted_player < ATTACK_THRESHOLD:
+		movedir += get_direction_to_targeted_player() * -1
+	elif not is_getting_on_line:
+		approach()
+			
 func bolster():
 	if is_getting_on_line:
 		movedir = get_orthogonal_direction()
 		var player_direction = get_direction_to_targeted_player()
-		if distance_to_targeted_player < ATTACK_THRESHOLD:
-			movedir += player_direction * -1
 		if distance_to_targeted_player < MINION_ATTACK_THRESHOLD:
 			movedir += player_direction * -1
 	elif distance_to_targeted_player > MINION_ATTACK_THRESHOLD:
 			approach()
-	else:
-		state_machine(states.ATTACK)
 		
 func attack():
-	if role == roles.AGGRESSOR:
-		if is_getting_on_line:
-			state_machine(states.ENGAGE)
-		elif distance_to_targeted_player > MELEE_THRESHOLD:
-			approach()
-		else:
-			movedir = Vector2()
-			lite_attack()
+	if role == roles.AGGRESSOR or role == roles.FLANKER:
+		var x_direction_to_targeted_player = get_direction_to_targeted_player().x
+		if distance_to_targeted_player > MELEE_THRESHOLD:
+			movedir = Vector2(x_direction_to_targeted_player, 0)
+		elif distance_to_targeted_player < 30:
+			movedir = Vector2(-x_direction_to_targeted_player, 0)
+		lite_attack()
 
 func lite_attack():
 	if not is_attacking:
+		is_attacking = true
 		if current_attack_index < 3:
 			anim_switch(str("lite_attack_", current_attack_index))
-			is_attacking = true
 			current_attack_index += 1
 	else:
 		state_machine(states.ENGAGE)
@@ -181,14 +164,11 @@ func aggressor_is_same_side():
 	return enemy_helpers.aggressor_is_same_side(aggressor_x_position, targeted_player_x_position, global_position.x)
 	
 func approach():
-	movedir = global_position.direction_to(get_targeted_player_position())
+	movedir = get_direction_to_targeted_player()
 
 func face_player():
 	var x_direction_to_player = get_direction_to_targeted_player().x
-	if x_direction_to_player < 0:
-		sprite.flip_h = true
-	elif x_direction_to_player >= 0:
-		sprite.flip_h = false
+	sprite.flip_h = enemy_helpers.face_player(x_direction_to_player)
 
 
 func _on_anim_animation_finished(anim_name):

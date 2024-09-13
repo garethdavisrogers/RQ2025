@@ -7,6 +7,7 @@ extends CharacterBody2D
 var type = null
 var movedir = Vector2()
 var spritedir = -1
+var melee_speed = 50
 var speed = 100
 var max_speed = 200
 
@@ -19,6 +20,7 @@ var roles
 var states
 var role
 var is_getting_on_line = false
+var cooling_down = false
 var current_attack_index = 1
 
 # Entity onready vars
@@ -39,10 +41,14 @@ func _ready():
 	states = level_manager.enums.states
 	roles = level_manager.enums.roles
 	state_machine(states.IDLE)
+	cooldown_timer.wait_time = 0.5
 
 # Movement logic
 func movement_loop():
-	velocity = speed * movedir
+	if state == states.ATTACK:
+		velocity = melee_speed * movedir
+	else:
+		velocity = speed * movedir
 	move_and_slide()
 
 # Sprite direction logic

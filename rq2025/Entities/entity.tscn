@@ -15,3 +15,5 @@ shape = SubResource("CapsuleShape2D_6h4b0")
 [node name="Anim" type="AnimationPlayer" parent="."]
 
 [node name="CoolDown" type="Timer" parent="."]
+
+[node name="HitCollider" type="CollisionShape2D" parent="."]

@@ -28,3 +28,18 @@ static func get_closest_player(lm, global_position, player_ids):
 				closest_distance = distance
 				closest_player = player_node
 	return closest_player
+
+static func set_role(lm, pid, roles):
+	var existing_roles = lm.get_player_assigned_enemies(pid)
+	if existing_roles[roles.AGGRESSOR] == null:
+		return roles.AGGRESSOR
+	elif existing_roles[roles.FLANKER] == null:
+		return roles.FLANKER
+	elif existing_roles[roles.MINION] == null:
+		return roles.MINION
+
+static func face_player(x_direction_to_player):
+	if x_direction_to_player < 0:
+		return true
+	elif x_direction_to_player >= 0:
+		return false
