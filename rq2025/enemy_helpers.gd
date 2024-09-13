@@ -16,3 +16,15 @@ static func aggressor_is_same_side(aggressor_x_position, targeted_player_x_posit
 	if max(aggressor_x_position, targeted_player_x_position, global_x_position) == targeted_player_x_position:
 		return true
 	return false
+
+static func get_closest_player(lm, global_position, player_ids):
+	var closest_player = null
+	var closest_distance = INF  # Start with a large number to compare distances
+	for id in player_ids:
+		var player_node = lm.get_player_instance(id)
+		if player_node:  # Ensure the player node exists
+			var distance = global_position.distance_to(lm.get_player_position(id))  # Calculate distance
+			if distance < closest_distance:
+				closest_distance = distance
+				closest_player = player_node
+	return closest_player

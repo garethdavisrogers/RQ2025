@@ -1,11 +1,13 @@
 extends "res://Entities/entity.gd"
 
-const ENGAGEMENT_THRESHOLD = 300
+const ENGAGEMENT_THRESHOLD = 250
 const ATTACK_THRESHOLD = 120
 const MINION_ATTACK_THRESHOLD = 180
+const MELEE_THRESHOLD = 100
 var enemy_helpers = load("res://enemy_helpers.gd")
 var targeted_player_id
 var distance_to_targeted_player
+var is_attacking = false
 
 func _ready():
 	add_to_group("ENEMY")
@@ -20,7 +22,7 @@ func _physics_process(_delta):
 			is_getting_on_line = true
 		
 		movement_loop()
-		spritedir_loop()
+		face_player()
 		set_is_on_line()
 		
 		if distance_to_targeted_player > ENGAGEMENT_THRESHOLD:
@@ -31,30 +33,23 @@ func _physics_process(_delta):
 			state_machine(states.ATTACK)
 	match state:
 		states.IDLE:
-			target_player()
+			target_player(level_manager)
+			anim_switch("idle")
 		states.SEEK:
 			seek()
+			anim_switch("walk")
 		states.ENGAGE:
 			engage()
+			anim_switch("walk")
 		states.ATTACK:
-			movedir = Vector2()
+			attack()
 				
-func target_player():
-	var least_agro_players = level_manager.get_least_agro_players()
+func target_player(lm):
+	var least_agro_players = lm.get_least_agro_players()
 	get_closest_player(least_agro_players)
 	
 func get_closest_player(player_ids):
-	var closest_player = null
-	var closest_distance = INF  # Start with a large number to compare distances
-	for id in player_ids:
-		var player_node = level_manager.get_player_instance(id)
-		if player_node:  # Ensure the player node exists
-			var distance = global_position.distance_to(level_manager.get_player_position(id))  # Calculate distance
-			if distance < closest_distance:
-				closest_distance = distance
-				closest_player = player_node
-				
-	# Update targeted_player_id with the closest player
+	var closest_player = enemy_helpers.get_closest_player(level_manager, global_position, player_ids)
 	if closest_player != null:
 		targeted_player_id = closest_player.id
 		set_role(targeted_player_id)
@@ -85,9 +80,8 @@ func engage():
 func flank():
 	var aggressor_is_same_side = aggressor_is_same_side()
 	if aggressor_is_same_side or is_getting_on_line:
-		var orthogonal_coefficient = get_orthogonal_coefficient()
 		var player_direction = get_direction_to_targeted_player()
-		var orthogonal_direction = get_direction_to_targeted_player().orthogonal() * orthogonal_coefficient 
+		var orthogonal_direction = get_orthogonal_direction()
 		if aggressor_is_same_side:
 			orthogonal_direction *= -1
 		movedir = orthogonal_direction.normalized()
@@ -122,6 +116,25 @@ func bolster():
 	else:
 		state_machine(states.ATTACK)
 		
+func attack():
+	if role == roles.AGGRESSOR:
+		if is_getting_on_line:
+			state_machine(states.ENGAGE)
+		elif distance_to_targeted_player > MELEE_THRESHOLD:
+			approach()
+		else:
+			movedir = Vector2()
+			lite_attack()
+
+func lite_attack():
+	if not is_attacking:
+		if current_attack_index < 3:
+			anim_switch(str("lite_attack_", current_attack_index))
+			is_attacking = true
+			current_attack_index += 1
+	else:
+		state_machine(states.ENGAGE)
+	
 func get_orthogonal_direction():
 	var orthogonal_coefficient = get_orthogonal_coefficient()
 	return get_direction_to_targeted_player().orthogonal() * orthogonal_coefficient
@@ -170,4 +183,14 @@ func aggressor_is_same_side():
 func approach():
 	movedir = global_position.direction_to(get_targeted_player_position())
 
-	
+func face_player():
+	var x_direction_to_player = get_direction_to_targeted_player().x
+	if x_direction_to_player < 0:
+		sprite.flip_h = true
+	elif x_direction_to_player >= 0:
+		sprite.flip_h = false
+
+
+func _on_anim_animation_finished(anim_name):
+	if anim_name.contains("lite_attack"):
+		is_attacking = false

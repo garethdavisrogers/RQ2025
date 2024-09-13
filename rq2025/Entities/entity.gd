@@ -19,12 +19,14 @@ var roles
 var states
 var role
 var is_getting_on_line = false
+var current_attack_index = 1
 
 # Entity onready vars
 @onready var id = self.get_instance_id()
 @onready var sprite = $Sprite2D
 @onready var hit_box = $Hitbox
 @onready var anim = $Anim
+@onready var cooldown_timer = $CoolDown
 
 func state_machine(s):
 	if state != s:
@@ -46,7 +48,11 @@ func movement_loop():
 # Sprite direction logic
 func spritedir_loop():
 	if movedir.x < 0:
-		spritedir = -1
+		sprite.flip_h = true
 	elif movedir.x > 0:
-		spritedir = 1
-	scale.x = scale.y * spritedir
+		sprite.flip_h = false
+
+func anim_switch(new_anim):
+	if anim.is_playing() and anim.current_animation == new_anim:
+		return
+	anim.play(new_anim)

@@ -13,3 +13,5 @@ script = ExtResource("1_k5r66")
 shape = SubResource("CapsuleShape2D_6h4b0")
 
 [node name="Anim" type="AnimationPlayer" parent="."]
+
+[node name="CoolDown" type="Timer" parent="."]

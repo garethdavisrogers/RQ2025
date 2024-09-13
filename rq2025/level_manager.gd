@@ -45,7 +45,6 @@ func get_player_assigned_enemies(pid):
 	
 func get_player_position(pid):
 	return player_tracker[pid].instance.global_position
-
 	
 func get_least_agro_players():
 	var least_agro_players = []
