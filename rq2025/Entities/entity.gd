@@ -22,13 +22,13 @@ var role
 var is_getting_on_line = false
 var cooling_down = false
 var current_attack_index = 1
-
 # Entity onready vars
 @onready var id = self.get_instance_id()
 @onready var sprite = $Sprite2D
 @onready var hit_box = $Hitbox
 @onready var anim = $Anim
 @onready var cooldown_timer = $CoolDown
+@onready var hit_collider = $HitCollider
 
 func state_machine(s):
 	if state != s:
@@ -62,3 +62,7 @@ func anim_switch(new_anim):
 	if anim.is_playing() and anim.current_animation == new_anim:
 		return
 	anim.play(new_anim)
+
+
+func _on_hitbox_area_entered(area):
+	var attacker = area.get_parent()

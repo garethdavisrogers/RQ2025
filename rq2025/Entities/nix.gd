@@ -3,12 +3,15 @@ extends "res://Entities/entity.gd"
 func _ready():
 	add_to_group("PLAYER")
 	super()
+	type = level_manager.enums.types.PLAYER
 
 func _physics_process(_delta):
-	# Add the gravity.
-	movement_loop()
-	spritedir_loop()
-	controls_loop()
+	if state != states.STAGGER:
+		movement_loop()
+		spritedir_loop()
+		controls_loop()
+	else:
+		anim_switch("stagger_1")
 
 func controls_loop():
 	var LEFT = Input.is_action_pressed("ui_left")

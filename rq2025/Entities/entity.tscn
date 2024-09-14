@@ -1,6 +1,8 @@
-[gd_scene load_steps=3 format=3 uid="uid://cshhy5ihatlaa"]
+[gd_scene load_steps=4 format=3 uid="uid://cshhy5ihatlaa"]
 
 [ext_resource type="Script" path="res://Entities/entity.gd" id="1_k5r66"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_dgkbn"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_6h4b0"]
 
@@ -9,11 +11,20 @@ script = ExtResource("1_k5r66")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 
-[node name="Hitbox" type="CollisionShape2D" parent="."]
-shape = SubResource("CapsuleShape2D_6h4b0")
-
 [node name="Anim" type="AnimationPlayer" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 
 [node name="CoolDown" type="Timer" parent="."]
 
-[node name="HitCollider" type="CollisionShape2D" parent="."]
+[node name="HitCollider" type="Area2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="HitCollider"]
+shape = SubResource("CircleShape2D_dgkbn")
+
+[node name="Hitbox" type="Area2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hitbox"]
+shape = SubResource("CapsuleShape2D_6h4b0")
+
+[connection signal="area_entered" from="Hitbox" to="." method="_on_hitbox_area_entered"]

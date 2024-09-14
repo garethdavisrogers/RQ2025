@@ -2,6 +2,7 @@ extends Node2D
 
 var enums = load("res://enums.gd")
 var roles = enums.roles
+var types = enums.types
 var player_tracker = {}
 
 func _ready():
@@ -9,7 +10,12 @@ func _ready():
 
 #Player initialization
 func get_players():
-	return get_tree().get_nodes_in_group("PLAYER")
+	var players = []
+	var player_group =  get_tree().get_nodes_in_group("PLAYER")
+	for node in player_group:
+		if node is CharacterBody2D:
+			players.append(node)
+	return players
 	
 func set_players():
 	var players = get_players()

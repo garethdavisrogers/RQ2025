@@ -12,6 +12,7 @@ var is_attacking = false
 func _ready():
 	add_to_group("ENEMY")
 	super()
+	type = level_manager.enums.types.ENEMY
 
 func _physics_process(_delta):
 	if targeted_player_id == null:

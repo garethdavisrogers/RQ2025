@@ -18,3 +18,10 @@ enum states {
 	STAGGER,
 	DEAD
 }
+
+enum types {
+	PLAYER,
+	ENEMY,
+	CPU,
+	NPC
+}

@@ -4,10 +4,6 @@
 [ext_resource type="Script" path="res://Entities/krax_enforcer.gd" id="2_t308c"]
 [ext_resource type="Texture2D" uid="uid://baeaybiflyfwu" path="res://Assets/krax_enforcer.png" id="3_b8ee5"]
 
-[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_3lj6d"]
-radius = 35.0
-height = 130.0
-
 [sub_resource type="Animation" id="Animation_omcp0"]
 length = 0.001
 tracks/0/type = "value"
@@ -156,8 +152,9 @@ _data = {
 "walk": SubResource("Animation_4ob7l")
 }
 
-[sub_resource type="CircleShape2D" id="CircleShape2D_3sai0"]
-radius = 20.0
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_eg5h5"]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_kbmj6"]
 
 [node name="KraxEnforcer" instance=ExtResource("1_es4tc")]
 script = ExtResource("2_t308c")
@@ -166,17 +163,24 @@ script = ExtResource("2_t308c")
 texture = ExtResource("3_b8ee5")
 hframes = 78
 
-[node name="Hitbox" parent="." index="1"]
-shape = SubResource("CapsuleShape2D_3lj6d")
-
-[node name="Anim" parent="." index="2"]
+[node name="Anim" parent="." index="1"]
 libraries = {
 "": SubResource("AnimationLibrary_lbpv4")
 }
 
+[node name="CollisionShape2D" parent="." index="2"]
+shape = SubResource("CapsuleShape2D_eg5h5")
+
 [node name="HitCollider" parent="." index="4"]
 position = Vector2(65, 1)
-shape = SubResource("CircleShape2D_3sai0")
-disabled = true
+collision_layer = 128
+collision_mask = 16
+
+[node name="CollisionShape2D" parent="HitCollider" index="0"]
+shape = SubResource("CapsuleShape2D_kbmj6")
+
+[node name="Hitbox" parent="." index="5"]
+collision_layer = 64
+collision_mask = 32
 
 [connection signal="animation_finished" from="Anim" to="." method="_on_anim_animation_finished"]
