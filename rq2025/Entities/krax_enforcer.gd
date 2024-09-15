@@ -1,8 +1,8 @@
 extends "res://Entities/entity.gd"
 
-const ENGAGEMENT_THRESHOLD = 200
-const ATTACK_THRESHOLD = 150
-const MINION_ATTACK_THRESHOLD = 180
+const ENGAGEMENT_THRESHOLD = 300
+const ATTACK_THRESHOLD = 200
+const MINION_ATTACK_THRESHOLD = 250
 const MELEE_THRESHOLD = 120
 var enemy_helpers = load("res://enemy_helpers.gd")
 var targeted_player_id
@@ -108,16 +108,20 @@ func bolster():
 			approach()
 		
 func attack():
-	if role == roles.AGGRESSOR or role == roles.FLANKER:
-		var x_direction_to_targeted_player = get_direction_to_targeted_player().x
+	var player_is_being_attacked = enemy_helpers.targeted_player_is_under_attack(get_targeted_player_assigned_enemies(), id)
+	var x_direction_to_targeted_player = get_direction_to_targeted_player().x
+	if player_is_being_attacked:
+		is_attacking = false
+		if distance_to_targeted_player > ATTACK_THRESHOLD - 10:
+			movedir = Vector2(x_direction_to_targeted_player, 0)
+		elif distance_to_targeted_player < MELEE_THRESHOLD + 10:
+			movedir = Vector2(-x_direction_to_targeted_player, 0)
+	else:
+		is_attacking = true
 		if distance_to_targeted_player > MELEE_THRESHOLD:
 			movedir = Vector2(x_direction_to_targeted_player, 0)
-		elif distance_to_targeted_player < 80:
-			movedir = Vector2(-x_direction_to_targeted_player, 0)
-		var player_is_being_attacked = enemy_helpers.targeted_player_is_under_attack(get_targeted_player_assigned_enemies())
-		if not cooling_down and not player_is_being_attacked:
-			is_attacking = true
-			lite_attack()
+		else:
+			movedir = Vector2()
 
 func lite_attack():
 	if current_attack_index < 3:
