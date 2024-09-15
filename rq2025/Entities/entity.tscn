@@ -27,4 +27,5 @@ shape = SubResource("CircleShape2D_dgkbn")
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Hitbox"]
 shape = SubResource("CapsuleShape2D_6h4b0")
 
+[connection signal="timeout" from="CoolDown" to="." method="_on_cool_down_timeout"]
 [connection signal="area_entered" from="Hitbox" to="." method="_on_hitbox_area_entered"]

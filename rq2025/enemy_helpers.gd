@@ -43,3 +43,9 @@ static func face_player(x_direction_to_player):
 		return true
 	elif x_direction_to_player >= 0:
 		return false
+
+static func targeted_player_is_under_attack(enemies):
+	for e in enemies:
+		if enemies[e] != null and enemies[e].is_attacking:
+			return true
+	return false

@@ -41,7 +41,7 @@ func _ready():
 	states = level_manager.enums.states
 	roles = level_manager.enums.roles
 	state_machine(states.IDLE)
-	cooldown_timer.wait_time = 0.5
+	cooldown_timer.wait_time = 0.8
 
 # Movement logic
 func movement_loop():
@@ -63,6 +63,12 @@ func anim_switch(new_anim):
 		return
 	anim.play(new_anim)
 
+func cooldown():
+	cooling_down = true
+	cooldown_timer.start()
 
 func _on_hitbox_area_entered(area):
-	var attacker = area.get_parent()
+	var attacker = area.get_overlapping_areas()
+
+func _on_cool_down_timeout():
+	cooling_down = false

@@ -3,16 +3,19 @@ extends "res://Entities/entity.gd"
 const ENGAGEMENT_THRESHOLD = 250
 const ATTACK_THRESHOLD = 150
 const MINION_ATTACK_THRESHOLD = 180
-const MELEE_THRESHOLD = 100
+const MELEE_THRESHOLD = 120
 var enemy_helpers = load("res://enemy_helpers.gd")
 var targeted_player_id
 var distance_to_targeted_player
 var is_attacking = false
 
+@onready var attack_timer = $AttackTimer
+
 func _ready():
 	add_to_group("ENEMY")
 	super()
 	type = level_manager.enums.types.ENEMY
+	attack_timer.wait_time = 3
 
 func _physics_process(_delta):
 	if targeted_player_id == null:
@@ -41,7 +44,6 @@ func _physics_process(_delta):
 			anim_switch("walk")
 		states.ENGAGE:
 			engage()
-			anim_switch("walk")
 		states.ATTACK:
 			attack()
 				
@@ -63,6 +65,9 @@ func seek():
 	approach()
 	
 func engage():
+	current_attack_index = 1
+	is_attacking = false
+	anim_switch("walk")
 	if role == roles.AGGRESSOR:
 		aggress()
 	elif role == roles.FLANKER:
@@ -106,18 +111,23 @@ func attack():
 		var x_direction_to_targeted_player = get_direction_to_targeted_player().x
 		if distance_to_targeted_player > MELEE_THRESHOLD:
 			movedir = Vector2(x_direction_to_targeted_player, 0)
-		elif distance_to_targeted_player < 30:
+		elif distance_to_targeted_player < 50:
 			movedir = Vector2(-x_direction_to_targeted_player, 0)
-		lite_attack()
+		if not cooling_down and not enemy_helpers.targeted_player_is_under_attack(get_targeted_player_assigned_enemies()):
+			lite_attack()
 
 func lite_attack():
 	if not is_attacking:
 		is_attacking = true
-		if current_attack_index < 3:
-			anim_switch(str("lite_attack_", current_attack_index))
-			current_attack_index += 1
+	if current_attack_index < 3:
+		anim_switch(str("lite_attack_", current_attack_index))
+		cooldown()
 	else:
-		state_machine(states.ENGAGE)
+		attack_timer.start()
+		cooling_down = true
+		current_attack_index = 1
+		anim_switch("walk")
+			
 	
 func get_orthogonal_direction():
 	var orthogonal_coefficient = get_orthogonal_coefficient()
@@ -174,4 +184,8 @@ func face_player():
 
 func _on_anim_animation_finished(anim_name):
 	if anim_name.contains("lite_attack"):
-		is_attacking = false
+		current_attack_index += 1
+
+
+func _on_attack_timer_timeout():
+	cooling_down = false
