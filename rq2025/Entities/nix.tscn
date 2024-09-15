@@ -21,7 +21,7 @@ tracks/0/keys = {
 tracks/1/type = "value"
 tracks/1/imported = false
 tracks/1/enabled = true
-tracks/1/path = NodePath("HitCollider:disabled")
+tracks/1/path = NodePath("Sprite2D/HitCollider/CollisionShape2D:disabled")
 tracks/1/interp = 1
 tracks/1/loop_wrap = true
 tracks/1/keys = {
@@ -48,7 +48,7 @@ tracks/0/keys = {
 tracks/1/type = "value"
 tracks/1/imported = false
 tracks/1/enabled = true
-tracks/1/path = NodePath("HitCollider:disabled")
+tracks/1/path = NodePath("Sprite2D/HitCollider/CollisionShape2D:disabled")
 tracks/1/interp = 1
 tracks/1/loop_wrap = true
 tracks/1/keys = {
@@ -77,7 +77,7 @@ tracks/0/keys = {
 tracks/1/type = "value"
 tracks/1/imported = false
 tracks/1/enabled = true
-tracks/1/path = NodePath("HitCollider:disabled")
+tracks/1/path = NodePath("Sprite2D/HitCollider/CollisionShape2D:disabled")
 tracks/1/interp = 1
 tracks/1/loop_wrap = true
 tracks/1/keys = {
@@ -105,7 +105,7 @@ tracks/0/keys = {
 tracks/1/type = "value"
 tracks/1/imported = false
 tracks/1/enabled = true
-tracks/1/path = NodePath("HitCollider:disabled")
+tracks/1/path = NodePath("Sprite2D/HitCollider/CollisionShape2D:disabled")
 tracks/1/interp = 1
 tracks/1/loop_wrap = true
 tracks/1/keys = {
@@ -132,6 +132,9 @@ script = ExtResource("2_eqbci")
 texture = ExtResource("3_jcy47")
 hframes = 64
 
+[node name="CollisionShape2D" parent="Sprite2D/HitCollider" index="0"]
+disabled = true
+
 [node name="Anim" parent="." index="1"]
 libraries = {
 "": SubResource("AnimationLibrary_6asa2")
@@ -139,11 +142,3 @@ libraries = {
 
 [node name="CollisionShape2D" parent="." index="2"]
 shape = SubResource("CapsuleShape2D_5vyb8")
-
-[node name="HitCollider" parent="." index="4"]
-collision_layer = 32
-collision_mask = 64
-
-[node name="Hitbox" parent="." index="5"]
-collision_layer = 16
-collision_mask = 128

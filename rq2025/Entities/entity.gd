@@ -25,10 +25,10 @@ var current_attack_index = 1
 # Entity onready vars
 @onready var id = self.get_instance_id()
 @onready var sprite = $Sprite2D
-@onready var hit_box = $Hitbox
+@onready var hit_box = $Sprite2D/Hitbox
 @onready var anim = $Anim
 @onready var cooldown_timer = $CoolDown
-@onready var hit_collider = $HitCollider
+@onready var hit_collider = $Sprite2D/HitCollider
 
 func state_machine(s):
 	if state != s:
@@ -54,9 +54,9 @@ func movement_loop():
 # Sprite direction logic
 func spritedir_loop():
 	if movedir.x < 0:
-		sprite.flip_h = true
+		sprite.scale.x = -abs(sprite.scale.x)
 	elif movedir.x > 0:
-		sprite.flip_h = false
+		sprite.scale.x = abs(sprite.scale.x)
 
 func anim_switch(new_anim):
 	if anim.is_playing() and anim.current_animation == new_anim:
@@ -66,9 +66,6 @@ func anim_switch(new_anim):
 func cooldown():
 	cooling_down = true
 	cooldown_timer.start()
-
-func _on_hitbox_area_entered(area):
-	var attacker = area.get_overlapping_areas()
 
 func _on_cool_down_timeout():
 	cooling_down = false

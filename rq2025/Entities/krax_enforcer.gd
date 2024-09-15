@@ -55,9 +55,9 @@ func get_closest_player(player_ids):
 	var closest_player = enemy_helpers.get_closest_player(level_manager, global_position, player_ids)
 	if closest_player != null:
 		targeted_player_id = closest_player.id
-		set_role(targeted_player_id)
+		set_role()
 
-func set_role(pid):
+func set_role():
 	role = enemy_helpers.set_role(level_manager, targeted_player_id, roles)
 	level_manager.update_assigned_enemies(targeted_player_id, self, role)
 
@@ -87,7 +87,6 @@ func aggress():
 			approach()
 
 func flank():
-	var player_direction = get_direction_to_targeted_player()
 	var orthogonal_direction = get_orthogonal_direction()
 	if aggressor_is_same_side():
 		is_getting_on_line = true
@@ -125,7 +124,6 @@ func attack():
 			lite_attack()
 
 func shuffle(attack_threshold, melee_threshold):
-	var player_is_being_attacked = enemy_helpers.targeted_player_is_under_attack(get_targeted_player_assigned_enemies(), id)
 	var x_direction_to_targeted_player = get_direction_to_targeted_player().x
 	if distance_to_targeted_player > attack_threshold - 10:
 		movedir = Vector2(x_direction_to_targeted_player, 0)
@@ -192,7 +190,11 @@ func approach():
 
 func face_player():
 	var x_direction_to_player = get_direction_to_targeted_player().x
-	sprite.flip_h = enemy_helpers.face_player(x_direction_to_player)
+	if x_direction_to_player < 0:
+		sprite.scale.x = -abs(sprite.scale.x)
+	else:
+		sprite.scale.x = abs(sprite.scale.x)
+
 
 
 func _on_anim_animation_finished(anim_name):
@@ -203,3 +205,7 @@ func _on_anim_animation_finished(anim_name):
 
 func _on_shuffle_timer_timeout():
 	cooling_down = false
+
+
+func _on_hitbox_area_entered(_area):
+	pass

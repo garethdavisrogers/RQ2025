@@ -11,21 +11,21 @@ script = ExtResource("1_k5r66")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 
+[node name="HitCollider" type="Area2D" parent="Sprite2D"]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Sprite2D/HitCollider"]
+shape = SubResource("CircleShape2D_dgkbn")
+
+[node name="Hitbox" type="Area2D" parent="Sprite2D"]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Sprite2D/Hitbox"]
+shape = SubResource("CapsuleShape2D_6h4b0")
+
 [node name="Anim" type="AnimationPlayer" parent="."]
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 
 [node name="CoolDown" type="Timer" parent="."]
 
-[node name="HitCollider" type="Area2D" parent="."]
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="HitCollider"]
-shape = SubResource("CircleShape2D_dgkbn")
-
-[node name="Hitbox" type="Area2D" parent="."]
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Hitbox"]
-shape = SubResource("CapsuleShape2D_6h4b0")
-
+[connection signal="area_entered" from="Sprite2D/Hitbox" to="." method="_on_hitbox_area_entered"]
 [connection signal="timeout" from="CoolDown" to="." method="_on_cool_down_timeout"]
-[connection signal="area_entered" from="Hitbox" to="." method="_on_hitbox_area_entered"]
