@@ -1,6 +1,6 @@
 extends "res://Entities/entity.gd"
 
-const ENGAGEMENT_THRESHOLD = 250
+const ENGAGEMENT_THRESHOLD = 200
 const ATTACK_THRESHOLD = 150
 const MINION_ATTACK_THRESHOLD = 180
 const MELEE_THRESHOLD = 120
@@ -62,11 +62,12 @@ func set_role(pid):
 	level_manager.update_assigned_enemies(targeted_player_id, self, role)
 
 func seek():
+	cooling_down = false
 	approach()
 	
 func engage():
-	current_attack_index = 1
 	is_attacking = false
+	current_attack_index = 1
 	anim_switch("walk")
 	if role == roles.AGGRESSOR:
 		aggress()
@@ -111,20 +112,21 @@ func attack():
 		var x_direction_to_targeted_player = get_direction_to_targeted_player().x
 		if distance_to_targeted_player > MELEE_THRESHOLD:
 			movedir = Vector2(x_direction_to_targeted_player, 0)
-		elif distance_to_targeted_player < 50:
+		elif distance_to_targeted_player < 80:
 			movedir = Vector2(-x_direction_to_targeted_player, 0)
-		if not cooling_down and not enemy_helpers.targeted_player_is_under_attack(get_targeted_player_assigned_enemies()):
+		var player_is_being_attacked = enemy_helpers.targeted_player_is_under_attack(get_targeted_player_assigned_enemies())
+		if not cooling_down and not player_is_being_attacked:
+			is_attacking = true
 			lite_attack()
 
 func lite_attack():
-	if not is_attacking:
-		is_attacking = true
 	if current_attack_index < 3:
 		anim_switch(str("lite_attack_", current_attack_index))
 		cooldown()
 	else:
 		attack_timer.start()
 		cooling_down = true
+		is_attacking = false
 		current_attack_index = 1
 		anim_switch("walk")
 			
