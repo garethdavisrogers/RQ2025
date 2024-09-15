@@ -3,19 +3,19 @@ extends "res://Entities/entity.gd"
 const ENGAGEMENT_THRESHOLD = 300
 const ATTACK_THRESHOLD = 200
 const MINION_ATTACK_THRESHOLD = 250
-const MELEE_THRESHOLD = 120
+const MELEE_THRESHOLD = 80
 var enemy_helpers = load("res://enemy_helpers.gd")
 var targeted_player_id
 var distance_to_targeted_player
 var is_attacking = false
 
-@onready var attack_timer = $AttackTimer
+@onready var shuffle_timer = $ShuffleTimer
 
 func _ready():
 	add_to_group("ENEMY")
 	super()
 	type = level_manager.enums.types.ENEMY
-	attack_timer.wait_time = 3
+	shuffle_timer.wait_time = 3
 
 func _physics_process(_delta):
 	if targeted_player_id == null:
@@ -112,28 +112,35 @@ func attack():
 	var x_direction_to_targeted_player = get_direction_to_targeted_player().x
 	if player_is_being_attacked:
 		is_attacking = false
-		if distance_to_targeted_player > ATTACK_THRESHOLD - 10:
-			movedir = Vector2(x_direction_to_targeted_player, 0)
-		elif distance_to_targeted_player < MELEE_THRESHOLD + 10:
-			movedir = Vector2(-x_direction_to_targeted_player, 0)
+		if role == roles.AGGRESSOR or role == roles.FLANKER:
+			shuffle(ATTACK_THRESHOLD, MELEE_THRESHOLD)
+		elif role == roles.MINION:
+			shuffle(MINION_ATTACK_THRESHOLD, MELEE_THRESHOLD)
 	else:
 		is_attacking = true
 		if distance_to_targeted_player > MELEE_THRESHOLD:
 			movedir = Vector2(x_direction_to_targeted_player, 0)
-		else:
+		elif not cooling_down:
 			movedir = Vector2()
+			lite_attack()
 
+func shuffle(attack_threshold, melee_threshold):
+	var player_is_being_attacked = enemy_helpers.targeted_player_is_under_attack(get_targeted_player_assigned_enemies(), id)
+	var x_direction_to_targeted_player = get_direction_to_targeted_player().x
+	if distance_to_targeted_player > attack_threshold - 10:
+		movedir = Vector2(x_direction_to_targeted_player, 0)
+	elif distance_to_targeted_player < melee_threshold + 50:
+		movedir = Vector2(-x_direction_to_targeted_player, 0)
+	
 func lite_attack():
-	if current_attack_index < 3:
-		anim_switch(str("lite_attack_", current_attack_index))
-		cooldown()
-	else:
-		attack_timer.start()
-		cooling_down = true
+	if current_attack_index > 2:
 		is_attacking = false
+		shuffle_timer.start()
 		current_attack_index = 1
 		anim_switch("walk")
-			
+	else:
+		anim_switch(str("lite_attack_", current_attack_index))
+		cooling_down = true
 	
 func get_orthogonal_direction():
 	var orthogonal_coefficient = get_orthogonal_coefficient()
@@ -191,7 +198,8 @@ func face_player():
 func _on_anim_animation_finished(anim_name):
 	if anim_name.contains("lite_attack"):
 		current_attack_index += 1
+		cooling_down = false
 
 
-func _on_attack_timer_timeout():
+func _on_shuffle_timer_timeout():
 	cooling_down = false

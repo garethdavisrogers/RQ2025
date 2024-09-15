@@ -15,5 +15,3 @@ position = Vector2(203, 295)
 position = Vector2(646, 262)
 
 [node name="KraxEnforcer2" parent="." instance=ExtResource("3_v487r")]
-
-[node name="KraxEnforcer3" parent="." instance=ExtResource("3_v487r")]
