@@ -84,4 +84,5 @@ func _on_hitbox_area_entered(area):
 			sprite.scale.x = abs(sprite.scale.x)
 		var damage = attacker.current_attack_index
 		health -= damage
+		anim_switch(str("stagger_", attacker.current_attack_index))
 		state_machine(states.STAGGER)
