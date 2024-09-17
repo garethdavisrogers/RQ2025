@@ -6,8 +6,13 @@ func _ready():
 	type = level_manager.enums.types.PLAYER
 
 func _physics_process(_delta):
+	movement_loop()
 	if state != states.STAGGER:
-		movement_loop()
+		knockdir = null
+		if movedir == Vector2():
+			anim_switch("idle")
+		else:
+			anim_switch("walk")
 		spritedir_loop()
 		controls_loop()
 	else:
@@ -24,3 +29,14 @@ func controls_loop():
 	
 	if movedir != Vector2.ZERO:
 		movedir = movedir.normalized()
+
+func face_enemy(direction_to_enemy):
+	if direction_to_enemy < 0:
+		sprite.scale.x = -abs(sprite.scale.x)
+	else:
+		sprite.scale.x = abs(sprite.scale.x)
+
+func _on_anim_animation_finished(anim_name):
+	if anim_name.contains("stagger"):
+		knockdir = null
+		state_machine(states.IDLE)

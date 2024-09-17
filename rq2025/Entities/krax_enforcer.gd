@@ -3,7 +3,7 @@ extends "res://Entities/entity.gd"
 const ENGAGEMENT_THRESHOLD = 300
 const ATTACK_THRESHOLD = 200
 const MINION_ATTACK_THRESHOLD = 250
-const MELEE_THRESHOLD = 80
+const MELEE_THRESHOLD = 85
 var enemy_helpers = load("res://enemy_helpers.gd")
 var targeted_player_id
 var distance_to_targeted_player
@@ -117,7 +117,7 @@ func attack():
 			shuffle(MINION_ATTACK_THRESHOLD, MELEE_THRESHOLD)
 	else:
 		is_attacking = true
-		if distance_to_targeted_player > MELEE_THRESHOLD:
+		if distance_to_targeted_player > MELEE_THRESHOLD - 5:
 			movedir = Vector2(x_direction_to_targeted_player, 0)
 		elif not cooling_down:
 			movedir = Vector2()
@@ -194,8 +194,6 @@ func face_player():
 		sprite.scale.x = -abs(sprite.scale.x)
 	else:
 		sprite.scale.x = abs(sprite.scale.x)
-
-
 
 func _on_anim_animation_finished(anim_name):
 	if anim_name.contains("lite_attack"):

@@ -6,6 +6,7 @@ extends CharacterBody2D
 # Entities all have some constants
 var type = null
 var movedir = Vector2()
+var knockdir = null
 var spritedir = -1
 var melee_speed = 50
 var speed = 100
@@ -16,6 +17,7 @@ var level_manager
 var targeted_player = null
 var state
 var is_dead = true
+var health = 100
 var roles
 var states
 var role
@@ -45,7 +47,9 @@ func _ready():
 
 # Movement logic
 func movement_loop():
-	if state == states.ATTACK:
+	if knockdir != null:
+		velocity = (floor(speed / 2)) * knockdir
+	elif state == states.ATTACK:
 		velocity = melee_speed * movedir
 	else:
 		velocity = speed * movedir
@@ -69,3 +73,15 @@ func cooldown():
 
 func _on_cool_down_timeout():
 	cooling_down = false
+
+func _on_hitbox_area_entered(area):
+	var attacker = area.get_parent().get_parent()
+	if attacker and attacker.state != states.STAGGER:
+		knockdir = global_position.direction_to(attacker.global_position) * -1
+		if knockdir.x > 0:
+			sprite.scale.x = -abs(sprite.scale.x)
+		else:
+			sprite.scale.x = abs(sprite.scale.x)
+		var damage = attacker.current_attack_index
+		health -= damage
+		state_machine(states.STAGGER)
