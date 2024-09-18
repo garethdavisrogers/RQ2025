@@ -86,3 +86,11 @@ func _on_hitbox_area_entered(area):
 		health -= damage
 		anim_switch(str("stagger_", attacker.current_attack_index))
 		state_machine(states.STAGGER)
+
+
+func _on_anim_animation_finished(anim_name):
+	if anim_name.contains("stagger"):
+		state_machine(states.IDLE)
+	elif anim_name.contains("lite_attack"):
+		current_attack_index += 1
+		cooling_down = false

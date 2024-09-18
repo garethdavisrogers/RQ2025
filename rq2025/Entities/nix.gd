@@ -27,8 +27,6 @@ func controls_loop():
 	
 	if movedir != Vector2.ZERO:
 		movedir = movedir.normalized()
-
-func _on_anim_animation_finished(anim_name):
-	if anim_name.contains("stagger"):
-		knockdir = null
-		state_machine(states.IDLE)
+		
+	if Input.is_action_just_pressed("lite_attack"):
+		pass

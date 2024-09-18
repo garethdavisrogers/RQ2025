@@ -29,12 +29,13 @@ func _physics_process(_delta):
 		face_player()
 		set_is_on_line()
 		
-		if distance_to_targeted_player > ENGAGEMENT_THRESHOLD:
-			state_machine(states.SEEK)
-		elif distance_to_targeted_player > ATTACK_THRESHOLD or is_getting_on_line:
-			state_machine(states.ENGAGE)
-		else:
-			state_machine(states.ATTACK)
+		if state != states.STAGGER:
+			if distance_to_targeted_player > ENGAGEMENT_THRESHOLD:
+				state_machine(states.SEEK)
+			elif distance_to_targeted_player > ATTACK_THRESHOLD or is_getting_on_line:
+				state_machine(states.ENGAGE)
+			else:
+				state_machine(states.ATTACK)
 	match state:
 		states.IDLE:
 			target_player(level_manager)
@@ -195,15 +196,5 @@ func face_player():
 	else:
 		sprite.scale.x = abs(sprite.scale.x)
 
-func _on_anim_animation_finished(anim_name):
-	if anim_name.contains("lite_attack"):
-		current_attack_index += 1
-		cooling_down = false
-
-
 func _on_shuffle_timer_timeout():
 	cooling_down = false
-
-
-func _on_hitbox_area_entered(_area):
-	pass
