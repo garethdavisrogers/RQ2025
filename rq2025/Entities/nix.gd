@@ -11,14 +11,18 @@ func _physics_process(_delta):
 	else:
 		movement_loop()
 		spritedir_loop()
+		index_is_even = get_index_is_even()
 		if state != states.STAGGER:
-			controls_loop()
 			knockdir = null
+			controls_loop()
 			if movedir == Vector2():
 				anim_switch("idle")
 			else:
 				anim_switch("walk")
-
+	
+	match state:
+		states.ATTACK:
+			pass
 
 func controls_loop():
 	var LEFT = Input.is_action_pressed("ui_left")

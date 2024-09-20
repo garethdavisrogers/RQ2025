@@ -68,6 +68,9 @@ func anim_switch(new_anim):
 		return
 	anim.play(new_anim)
 
+func get_index_is_even():
+	return current_attack_index % 2 == 0
+	
 func cooldown():
 	cooling_down = true
 	cooldown_timer.start()

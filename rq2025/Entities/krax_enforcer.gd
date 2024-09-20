@@ -27,6 +27,7 @@ func _physics_process(_delta):
 		else:
 			distance_to_targeted_player = get_distance_to_targeted_player()
 			direction_to_targeted_player = get_direction_to_targeted_player()
+			index_is_even = get_index_is_even()
 			if not get_is_on_line():
 				is_getting_on_line = true
 			
