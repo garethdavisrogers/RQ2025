@@ -24,6 +24,7 @@ var role
 var is_getting_on_line = false
 var cooling_down = false
 var current_attack_index = 1
+var index_is_even = false
 # Entity onready vars
 @onready var id = self.get_instance_id()
 @onready var sprite = $Sprite2D

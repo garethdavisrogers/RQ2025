@@ -6,15 +6,19 @@ func _ready():
 	type = level_manager.enums.types.PLAYER
 
 func _physics_process(_delta):
-	movement_loop()
-	if state != states.STAGGER:
-		knockdir = null
-		if movedir == Vector2():
-			anim_switch("idle")
-		else:
-			anim_switch("walk")
+	if state == states.DEAD:
+		anim_switch("die")
+	else:
+		movement_loop()
 		spritedir_loop()
-		controls_loop()
+		if state != states.STAGGER:
+			controls_loop()
+			knockdir = null
+			if movedir == Vector2():
+				anim_switch("idle")
+			else:
+				anim_switch("walk")
+
 
 func controls_loop():
 	var LEFT = Input.is_action_pressed("ui_left")

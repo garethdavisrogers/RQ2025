@@ -3,10 +3,11 @@ extends "res://Entities/entity.gd"
 const ENGAGEMENT_THRESHOLD = 300
 const ATTACK_THRESHOLD = 200
 const MINION_ATTACK_THRESHOLD = 250
-const MELEE_THRESHOLD = 85
+const MELEE_THRESHOLD = 80
 var enemy_helpers = load("res://enemy_helpers.gd")
 var targeted_player_id
 var distance_to_targeted_player
+var direction_to_targeted_player
 var is_attacking = false
 
 @onready var shuffle_timer = $ShuffleTimer
@@ -18,35 +19,39 @@ func _ready():
 	shuffle_timer.wait_time = 3
 
 func _physics_process(_delta):
-	if targeted_player_id == null:
-		state_machine(states.IDLE)
+	if state == states.DEAD:
+		anim_switch("die")
 	else:
-		distance_to_targeted_player = get_distance_to_targeted_player()
-		if not get_is_on_line():
-			is_getting_on_line = true
-		
-		movement_loop()
-		face_player()
-		set_is_on_line()
-		
-		if state != states.STAGGER:
-			if distance_to_targeted_player > ENGAGEMENT_THRESHOLD:
-				state_machine(states.SEEK)
-			elif distance_to_targeted_player > ATTACK_THRESHOLD or is_getting_on_line:
-				state_machine(states.ENGAGE)
-			else:
-				state_machine(states.ATTACK)
-	match state:
-		states.IDLE:
+		if targeted_player_id == null:
 			target_player(level_manager)
-			anim_switch("idle")
-		states.SEEK:
-			seek()
-			anim_switch("walk")
-		states.ENGAGE:
-			engage()
-		states.ATTACK:
-			attack()
+		else:
+			distance_to_targeted_player = get_distance_to_targeted_player()
+			direction_to_targeted_player = get_direction_to_targeted_player()
+			if not get_is_on_line():
+				is_getting_on_line = true
+			
+			movement_loop()
+			face_player()
+			set_is_on_line()
+			
+			if state != states.STAGGER:
+				knockdir = null
+				if distance_to_targeted_player > ENGAGEMENT_THRESHOLD:
+					state_machine(states.SEEK)
+				elif distance_to_targeted_player > ATTACK_THRESHOLD or is_getting_on_line:
+					state_machine(states.ENGAGE)
+				else:
+					state_machine(states.ATTACK)
+		match state:
+			states.IDLE:
+				anim_switch("idle")
+			states.SEEK:
+				seek()
+				anim_switch("walk")
+			states.ENGAGE:
+				engage()
+			states.ATTACK:
+				attack()
 				
 func target_player(lm):
 	var least_agro_players = lm.get_least_agro_players()
@@ -57,6 +62,8 @@ func get_closest_player(player_ids):
 	if closest_player != null:
 		targeted_player_id = closest_player.id
 		set_role()
+	else:
+		state_machine(states.IDLE)
 
 func set_role():
 	role = enemy_helpers.set_role(level_manager, targeted_player_id, roles)
@@ -83,7 +90,7 @@ func aggress():
 	if is_getting_on_line:
 		movedir = get_orthogonal_direction()
 		if distance_to_targeted_player < ATTACK_THRESHOLD:
-			movedir += get_direction_to_targeted_player() * -1
+			movedir += direction_to_targeted_player * -1
 	elif distance_to_targeted_player > ATTACK_THRESHOLD:
 			approach()
 
@@ -94,22 +101,21 @@ func flank():
 		orthogonal_direction *= -1
 	movedir = orthogonal_direction.normalized()
 	if distance_to_targeted_player < ATTACK_THRESHOLD:
-		movedir += get_direction_to_targeted_player() * -1
+		movedir += direction_to_targeted_player * -1
 	elif not is_getting_on_line:
 		approach()
 			
 func bolster():
 	if is_getting_on_line:
 		movedir = get_orthogonal_direction()
-		var player_direction = get_direction_to_targeted_player()
 		if distance_to_targeted_player < MINION_ATTACK_THRESHOLD:
-			movedir += player_direction * -1
+			movedir += direction_to_targeted_player * -1
 	elif distance_to_targeted_player > MINION_ATTACK_THRESHOLD:
 			approach()
 		
 func attack():
 	var player_is_being_attacked = enemy_helpers.targeted_player_is_under_attack(get_targeted_player_assigned_enemies(), id)
-	var x_direction_to_targeted_player = get_direction_to_targeted_player().x
+	var x_direction_to_targeted_player = direction_to_targeted_player.x
 	if player_is_being_attacked:
 		is_attacking = false
 		if role == roles.AGGRESSOR or role == roles.FLANKER:
@@ -125,7 +131,7 @@ func attack():
 			lite_attack()
 
 func shuffle(attack_threshold, melee_threshold):
-	var x_direction_to_targeted_player = get_direction_to_targeted_player().x
+	var x_direction_to_targeted_player = direction_to_targeted_player.x
 	if distance_to_targeted_player > attack_threshold - 10:
 		movedir = Vector2(x_direction_to_targeted_player, 0)
 	elif distance_to_targeted_player < melee_threshold + 50:
@@ -143,7 +149,7 @@ func lite_attack():
 	
 func get_orthogonal_direction():
 	var orthogonal_coefficient = get_orthogonal_coefficient()
-	return get_direction_to_targeted_player().orthogonal() * orthogonal_coefficient
+	return direction_to_targeted_player.orthogonal() * orthogonal_coefficient
 	
 func get_distance_to_targeted_player():
 	return global_position.distance_to(get_targeted_player_position())
