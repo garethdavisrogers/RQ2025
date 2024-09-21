@@ -33,8 +33,6 @@ func _physics_process(_delta):
 			face_player()
 			set_is_on_line()
 			
-			if state != states.ATTACK:
-				reset_non_attack_variables()
 			
 			if state != states.STAGGER:
 				knockdir = null
@@ -44,6 +42,10 @@ func _physics_process(_delta):
 					state_machine(states.ENGAGE)
 				else:
 					state_machine(states.ATTACK)
+					
+				if state != states.ATTACK:
+					reset_non_attack_variables()
+					
 		match state:
 			states.IDLE:
 				anim_switch("idle")

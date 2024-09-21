@@ -17,13 +17,12 @@ func _physics_process(_delta):
 			knockdir = null
 			controls_loop()
 		
-		if state != states.ATTACK:
-			current_attack_index = 1
-			cooling_down = false
-			if movedir == Vector2():
-				anim_switch("idle")
-			else:
-				anim_switch("walk")
+			if state != states.ATTACK:
+				reset_non_attack_variables()
+				if movedir == Vector2():
+					anim_switch("idle")
+				else:
+					anim_switch("walk")
 	
 	match state:
 		states.ATTACK:
