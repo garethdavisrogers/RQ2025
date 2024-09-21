@@ -16,12 +16,12 @@ var max_speed = 200
 var level_manager
 var targeted_player = null
 var state
-var is_dead = true
 var health = 100
 var roles
 var states
 var role
 var is_getting_on_line = false
+var is_attacking = false
 var cooling_down = false
 var current_attack_index = 1
 var index_is_even = false
@@ -40,7 +40,6 @@ func state_machine(s):
 func _ready():
 	# Access LevelManager using an autoload reference or correct node path
 	level_manager = get_node_or_null("/root/Level")
-	is_dead = false
 	states = level_manager.enums.states
 	roles = level_manager.enums.roles
 	state_machine(states.IDLE)
@@ -74,6 +73,11 @@ func get_index_is_even():
 func cooldown():
 	cooling_down = true
 	cooldown_timer.start()
+	
+func reset_non_attack_variables():
+	current_attack_index = 1
+	cooling_down = false
+	is_attacking = false
 
 func _on_cool_down_timeout():
 	cooling_down = false
@@ -93,8 +97,7 @@ func _on_hitbox_area_entered(area):
 
 
 func _on_anim_animation_finished(anim_name):
-	if anim_name.contains("stagger"):
+	if anim_name.contains("die"):
+		queue_free()
+	elif anim_name.contains("stagger"):
 		state_machine(states.IDLE)
-	elif anim_name.contains("lite_attack"):
-		current_attack_index += 1
-		cooling_down = false

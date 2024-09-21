@@ -14,7 +14,13 @@ enum states {
 	ENGAGE,
 	ATTACK,
 	DEFEND,
+	FLY,
+	JUMP,
+	LAND,
 	CLINCH,
+	CLINCHED,
+	FALL,
+	KNOCKDOWN,
 	STAGGER,
 	DEAD
 }

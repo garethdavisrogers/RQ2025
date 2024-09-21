@@ -8,7 +8,6 @@ var enemy_helpers = load("res://enemy_helpers.gd")
 var targeted_player_id
 var distance_to_targeted_player
 var direction_to_targeted_player
-var is_attacking = false
 
 @onready var shuffle_timer = $ShuffleTimer
 
@@ -30,10 +29,12 @@ func _physics_process(_delta):
 			index_is_even = get_index_is_even()
 			if not get_is_on_line():
 				is_getting_on_line = true
-			
 			movement_loop()
 			face_player()
 			set_is_on_line()
+			
+			if state != states.ATTACK:
+				reset_non_attack_variables()
 			
 			if state != states.STAGGER:
 				knockdir = null
@@ -205,3 +206,9 @@ func face_player():
 
 func _on_shuffle_timer_timeout():
 	cooling_down = false
+	
+func _on_anim_animation_finished(anim_name):
+	super(anim_name)
+	if anim_name.contains("lite_attack"):
+		current_attack_index += 1
+		cooling_down = false
