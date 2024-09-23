@@ -1,7 +1,8 @@
-[gd_scene load_steps=3 format=3 uid="uid://b6s5wq7jga0u0"]
+[gd_scene load_steps=4 format=3 uid="uid://b6s5wq7jga0u0"]
 
 [ext_resource type="Script" path="res://level_manager.gd" id="1_0jlth"]
 [ext_resource type="PackedScene" uid="uid://c4w8dtsce88rs" path="res://Entities/nix.tscn" id="2_aickq"]
+[ext_resource type="PackedScene" uid="uid://cbowpthynvu32" path="res://Entities/krax_enforcer.tscn" id="3_iuhxw"]
 
 [node name="Level" type="Node2D"]
 y_sort_enabled = true
@@ -9,3 +10,6 @@ script = ExtResource("1_0jlth")
 
 [node name="Nix" parent="." instance=ExtResource("2_aickq")]
 position = Vector2(598, 333)
+
+[node name="KraxEnforcer" parent="." instance=ExtResource("3_iuhxw")]
+position = Vector2(274, 326)

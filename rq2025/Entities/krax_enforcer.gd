@@ -26,7 +26,7 @@ func _physics_process(_delta):
 		else:
 			distance_to_targeted_player = get_distance_to_targeted_player()
 			direction_to_targeted_player = get_direction_to_targeted_player()
-			index_is_even = get_index_is_even()
+			attack_index_is_even = get_index_is_even()
 			if not get_is_on_line():
 				is_getting_on_line = true
 			movement_loop()
@@ -144,11 +144,15 @@ func shuffle(attack_threshold, melee_threshold):
 func lite_attack():
 	if current_attack_index > 2:
 		is_attacking = false
+		is_striking = false
+		is_countering = false
 		shuffle_timer.start()
 		current_attack_index = 1
 		anim_switch("walk")
-	else:
+	elif not cooling_down:
 		anim_switch(str("lite_attack_", current_attack_index))
+		is_striking = true
+		current_attack_index += 1
 		cooling_down = true
 	
 func get_orthogonal_direction():
@@ -212,5 +216,4 @@ func _on_shuffle_timer_timeout():
 func _on_anim_animation_finished(anim_name):
 	super(anim_name)
 	if anim_name.contains("lite_attack"):
-		current_attack_index += 1
 		cooling_down = false

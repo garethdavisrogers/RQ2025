@@ -24,7 +24,9 @@ var is_getting_on_line = false
 var is_attacking = false
 var cooling_down = false
 var current_attack_index = 1
-var index_is_even = false
+var attack_index_is_even = false
+var is_striking = false
+var is_countering = false
 # Entity onready vars
 @onready var id = self.get_instance_id()
 @onready var sprite = $Sprite2D
@@ -85,15 +87,19 @@ func _on_cool_down_timeout():
 func _on_hitbox_area_entered(area):
 	var attacker = area.get_parent().get_parent()
 	if attacker and attacker.state != states.STAGGER:
-		knockdir = global_position.direction_to(attacker.global_position) * -1
-		if knockdir.x > 0:
-			sprite.scale.x = -abs(sprite.scale.x)
+		if state == states.ATTACK and not attacker.is_countering:
+			if attack_index_is_even == attacker.attack_index_is_even:
+				is_countering = true
 		else:
-			sprite.scale.x = abs(sprite.scale.x)
-		var damage = attacker.current_attack_index
-		health -= damage
-		anim_switch(str("stagger_", attacker.current_attack_index))
-		state_machine(states.STAGGER)
+			knockdir = global_position.direction_to(attacker.global_position) * -1
+			if knockdir.x > 0:
+				sprite.scale.x = -abs(sprite.scale.x)
+			else:
+				sprite.scale.x = abs(sprite.scale.x)
+			var damage = attacker.current_attack_index
+			health -= damage
+			anim_switch(str("stagger_", attacker.current_attack_index))
+			state_machine(states.STAGGER)
 
 
 func _on_anim_animation_finished(anim_name):

@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3 uid="uid://cbowpthynvu32"]
+[gd_scene load_steps=17 format=3 uid="uid://cbowpthynvu32"]
 
 [ext_resource type="PackedScene" uid="uid://cshhy5ihatlaa" path="res://Entities/entity.tscn" id="1_es4tc"]
 [ext_resource type="Script" path="res://Entities/krax_enforcer.gd" id="2_t308c"]
@@ -6,6 +6,10 @@
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_nag3k"]
 radius = 20.0
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_y24mq"]
+radius = 20.0
+height = 65.0
 
 [sub_resource type="Animation" id="Animation_omcp0"]
 length = 0.001
@@ -176,6 +180,36 @@ tracks/1/keys = {
 "values": [true]
 }
 
+[sub_resource type="Animation" id="Animation_mv1m6"]
+resource_name = "stagger_3"
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Sprite2D:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [18]
+}
+
+[sub_resource type="Animation" id="Animation_1kwwi"]
+resource_name = "stagger_4"
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Sprite2D:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [18]
+}
+
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_lbpv4"]
 _data = {
 "RESET": SubResource("Animation_omcp0"),
@@ -184,10 +218,14 @@ _data = {
 "lite_attack_2": SubResource("Animation_26kcd"),
 "stagger_1": SubResource("Animation_rwasl"),
 "stagger_2": SubResource("Animation_epdsn"),
+"stagger_3": SubResource("Animation_mv1m6"),
+"stagger_4": SubResource("Animation_1kwwi"),
 "walk": SubResource("Animation_4ob7l")
 }
 
-[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_eg5h5"]
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_m4l7r"]
+radius = 20.0
+height = 60.0
 
 [node name="KraxEnforcer" instance=ExtResource("1_es4tc")]
 script = ExtResource("2_t308c")
@@ -209,13 +247,16 @@ disabled = true
 collision_layer = 64
 collision_mask = 32
 
+[node name="CollisionShape2D" parent="Sprite2D/Hitbox" index="0"]
+shape = SubResource("CapsuleShape2D_y24mq")
+
 [node name="Anim" parent="." index="1"]
 libraries = {
 "": SubResource("AnimationLibrary_lbpv4")
 }
 
 [node name="CollisionShape2D" parent="." index="2"]
-shape = SubResource("CapsuleShape2D_eg5h5")
+shape = SubResource("CapsuleShape2D_m4l7r")
 
 [node name="ShuffleTimer" type="Timer" parent="." index="4"]
 
