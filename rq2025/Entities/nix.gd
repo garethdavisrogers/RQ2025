@@ -13,15 +13,12 @@ func _physics_process(_delta):
 		spritedir_loop()
 		attack_index_is_even = get_index_is_even()
 		
+		if state != states.ATTACK:
+			reset_non_attack_variables()
+				
 		if state != states.STAGGER:
 			knockdir = null
 			controls_loop()
-		
-			if state != states.ATTACK:
-				reset_non_attack_variables()
-				is_striking = false
-				is_countering = false
-				
 
 	match state:
 		states.IDLE:
@@ -44,7 +41,6 @@ func controls_loop():
 		
 	if Input.is_action_just_pressed("lite_attack"):
 		state_machine(states.ATTACK)
-		is_striking = true
 		if current_attack_index < 5 and not cooling_down:
 			anim_switch(str("lite_attack_", current_attack_index))
 			current_attack_index += 1
@@ -54,7 +50,6 @@ func controls_loop():
 func _on_anim_animation_finished(anim_name):
 	super(anim_name)
 	if anim_name.contains("lite_attack"):
-		cooling_down = false
 		state_machine(states.IDLE)
 	if anim_name.contains("stagger"):
 		state_machine(states.IDLE)

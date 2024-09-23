@@ -422,6 +422,7 @@ collision_layer = 64
 collision_mask = 32
 
 [node name="CollisionShape2D" parent="Sprite2D/Hitbox" index="0"]
+position = Vector2(10, 0)
 shape = SubResource("CapsuleShape2D_y24mq")
 
 [node name="Anim" parent="." index="1"]

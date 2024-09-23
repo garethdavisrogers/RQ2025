@@ -3,7 +3,7 @@ extends "res://Entities/entity.gd"
 const ENGAGEMENT_THRESHOLD = 300
 const ATTACK_THRESHOLD = 200
 const MINION_ATTACK_THRESHOLD = 250
-const MELEE_THRESHOLD = 80
+const MELEE_THRESHOLD = 90
 var enemy_helpers = load("res://enemy_helpers.gd")
 var targeted_player_id
 var distance_to_targeted_player
@@ -15,7 +15,7 @@ func _ready():
 	add_to_group("ENEMY")
 	super()
 	type = level_manager.enums.types.ENEMY
-	shuffle_timer.wait_time = 3
+	shuffle_timer.wait_time = 5
 
 func _physics_process(_delta):
 	if state == states.DEAD:
@@ -33,6 +33,8 @@ func _physics_process(_delta):
 			face_player()
 			set_is_on_line()
 			
+			if state != states.ATTACK:
+				reset_non_attack_variables()
 			
 			if state != states.STAGGER:
 				knockdir = null
@@ -42,9 +44,6 @@ func _physics_process(_delta):
 					state_machine(states.ENGAGE)
 				else:
 					state_machine(states.ATTACK)
-					
-				if state != states.ATTACK:
-					reset_non_attack_variables()
 					
 		match state:
 			states.IDLE:
@@ -78,8 +77,6 @@ func seek():
 	approach()
 	
 func engage():
-	is_attacking = false
-	current_attack_index = 1
 	anim_switch("walk")
 	if role == roles.AGGRESSOR:
 		aggress()
@@ -143,17 +140,14 @@ func shuffle(attack_threshold, melee_threshold):
 	
 func lite_attack():
 	if current_attack_index > 4:
-		is_attacking = false
-		is_striking = false
-		is_countering = false
+		reset_non_attack_variables()
 		shuffle_timer.start()
-		current_attack_index = 1
 		anim_switch("walk")
 	elif not cooling_down:
 		anim_switch(str("lite_attack_", current_attack_index))
 		is_striking = true
 		current_attack_index += 1
-		cooling_down = true
+	cooling_down = true
 	
 func get_orthogonal_direction():
 	var orthogonal_coefficient = get_orthogonal_coefficient()
