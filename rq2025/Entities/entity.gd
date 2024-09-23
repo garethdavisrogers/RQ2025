@@ -45,7 +45,7 @@ func _ready():
 	states = level_manager.enums.states
 	roles = level_manager.enums.roles
 	state_machine(states.IDLE)
-	cooldown_timer.wait_time = 0.8
+	cooldown_timer.wait_time = 0.2
 
 # Movement logic
 func movement_loop():
@@ -65,9 +65,8 @@ func spritedir_loop():
 		sprite.scale.x = abs(sprite.scale.x)
 
 func anim_switch(new_anim):
-	if anim.is_playing() and anim.current_animation == new_anim:
-		return
-	anim.play(new_anim)
+	if anim.current_animation != new_anim:
+		anim.play(new_anim)
 
 func get_index_is_even():
 	return current_attack_index % 2 == 0
@@ -98,12 +97,11 @@ func _on_hitbox_area_entered(area):
 				sprite.scale.x = abs(sprite.scale.x)
 			var damage = attacker.current_attack_index
 			health -= damage
-			anim_switch(str("stagger_", attacker.current_attack_index))
+			var stagger_ind = min(attacker.current_attack_index, 4)
+			anim_switch(str("stagger_", stagger_ind))
 			state_machine(states.STAGGER)
 
 
 func _on_anim_animation_finished(anim_name):
 	if anim_name.contains("die"):
 		queue_free()
-	elif anim_name.contains("stagger"):
-		state_machine(states.IDLE)

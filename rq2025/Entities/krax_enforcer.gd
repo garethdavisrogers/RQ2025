@@ -142,7 +142,7 @@ func shuffle(attack_threshold, melee_threshold):
 		movedir = Vector2(-x_direction_to_targeted_player, 0)
 	
 func lite_attack():
-	if current_attack_index > 2:
+	if current_attack_index > 4:
 		is_attacking = false
 		is_striking = false
 		is_countering = false
@@ -217,3 +217,6 @@ func _on_anim_animation_finished(anim_name):
 	super(anim_name)
 	if anim_name.contains("lite_attack"):
 		cooling_down = false
+	if anim_name.contains("stagger"):
+		cooling_down = false
+		state_machine(states.ATTACK)

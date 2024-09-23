@@ -56,3 +56,5 @@ func _on_anim_animation_finished(anim_name):
 	if anim_name.contains("lite_attack"):
 		cooling_down = false
 		state_machine(states.IDLE)
+	if anim_name.contains("stagger"):
+		state_machine(states.IDLE)
